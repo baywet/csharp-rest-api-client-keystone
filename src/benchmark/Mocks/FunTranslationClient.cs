@@ -33,8 +33,9 @@ public static class FunTranslationClient
             .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(responseMessage);
 
-        mockMessageHandler.Protected()
-            .Setup("Dispose")
+        mockMessageHandler
+        .Protected()
+            .Setup("Dispose", ItExpr.IsAny<bool>())
             .Callback(responseMessage.Dispose);
 
         return new HttpClient(mockMessageHandler.Object);
