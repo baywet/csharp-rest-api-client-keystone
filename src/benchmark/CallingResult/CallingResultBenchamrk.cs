@@ -12,17 +12,17 @@ public class CallingResultBenchmark : IDisposable
     [Benchmark]
     public void CallingResult()
     {
-        var result = _httpClient.GetAsync("https://localhost").Result;
+        var result = _httpClient.GetAsync(new Uri("https://localhost")).Result;
     }
     [Benchmark]
     public async Task CallingAsync()
     {
-        var result = await _httpClient.GetAsync("https://localhost");
+        var result = await _httpClient.GetAsync(new Uri("https://localhost")).ConfigureAwait(false);
     }
     [Benchmark]
     public async Task CallingWithCancellationTokenAsync()
     {
-        var result = await _httpClient.GetAsync("https://localhost", _cancellationTokenSource.Token);
+        var result = await _httpClient.GetAsync(new Uri("https://localhost"), _cancellationTokenSource.Token).ConfigureAwait(false);
     }
 
     public void Dispose()
