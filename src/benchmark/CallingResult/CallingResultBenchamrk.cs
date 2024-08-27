@@ -4,8 +4,6 @@ using BenchmarkDotNet.Attributes;
 
 namespace benchmark.CallingResult;
 [MemoryDiagnoser]
-[ThreadingDiagnoser]
-[DisassemblyDiagnoser]
 public class CallingResultBenchmark : IDisposable
 {
     private readonly HttpClient _httpClient = FunTranslationClient.GetHttpClient();

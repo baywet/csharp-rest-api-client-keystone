@@ -8,7 +8,7 @@ namespace benchmark.Mocks;
 
 public static class FunTranslationClient
 {
-    private const string returnJson =
+    private const string ReturnJson =
         """
 		{
 			"success": {
@@ -26,16 +26,16 @@ public static class FunTranslationClient
         var responseMessage = new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.OK,
-            Content = new StringContent(returnJson, MediaTypeHeaderValue.Parse("application/json"))
+            Content = new StringContent(ReturnJson, MediaTypeHeaderValue.Parse("application/json"))
         };
         var mockMessageHandler = new Mock<HttpMessageHandler>();
         mockMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
             .ReturnsAsync(responseMessage);
 
-        // mockMessageHandler.Protected()
-        // 	.Setup<HttpResponseMessage>("Send", It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>())
-        // 	.Returns(responseMessage);
+        mockMessageHandler.Protected()
+            .Setup("Dispose")
+            .Callback(responseMessage.Dispose);
 
         return new HttpClient(mockMessageHandler.Object);
     }
