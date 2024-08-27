@@ -1,9 +1,10 @@
-using Benchmarks.Mocks;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 
 using BenchmarkDotNet.Attributes;
-using System.Text.Json;
-using System.Text;
-using System.Text.Json.Serialization.Metadata;
+
+using Benchmarks.Mocks;
 
 namespace Benchmarks.Deserialization;
 [ShortRunJob]
