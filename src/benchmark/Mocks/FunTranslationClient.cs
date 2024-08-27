@@ -23,11 +23,13 @@ public static class FunTranslationClient
 		""";
     public static HttpClient GetHttpClient()
     {
+#pragma warning disable CA2000 // Dispose objects before losing scope
         var responseMessage = new HttpResponseMessage
         {
             StatusCode = HttpStatusCode.OK,
             Content = new StringContent(ReturnJson, MediaTypeHeaderValue.Parse("application/json"))
         };
+#pragma warning restore CA2000 // Dispose objects before losing scope
         var mockMessageHandler = new Mock<HttpMessageHandler>();
         mockMessageHandler.Protected()
             .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())

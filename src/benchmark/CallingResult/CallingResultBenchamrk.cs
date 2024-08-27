@@ -3,36 +3,42 @@ using benchmark.Mocks;
 using BenchmarkDotNet.Attributes;
 
 namespace benchmark.CallingResult;
+[ShortRunJob]
 [MemoryDiagnoser]
-public class CallingResultBenchmark : IDisposable
+#pragma warning disable CA1001 // Types that own disposable fields should be disposable
+public class CallingResultBenchmark
+#pragma warning restore CA1001 // Types that own disposable fields should be disposable
 {
-    private readonly HttpClient _httpClient = FunTranslationClient.GetHttpClient();
-    private readonly CancellationTokenSource _cancellationTokenSource = new();
-
-    [Benchmark]
-    public void CallingResult()
+    private HttpClient? _httpClient;
+    private CancellationTokenSource? _cancellationTokenSource;
+    private readonly Uri _targetUri = new("https://localhost");
+    [GlobalSetup]
+    public void Setup()
     {
-        var result = _httpClient.GetAsync(new Uri("https://localhost")).Result;
-    }
-    [Benchmark]
-    public async Task CallingAsync()
-    {
-        var result = await _httpClient.GetAsync(new Uri("https://localhost")).ConfigureAwait(false);
-    }
-    [Benchmark]
-    public async Task CallingWithCancellationTokenAsync()
-    {
-        var result = await _httpClient.GetAsync(new Uri("https://localhost"), _cancellationTokenSource.Token).ConfigureAwait(false);
+        _httpClient = FunTranslationClient.GetHttpClient();
+        _cancellationTokenSource = new();
     }
 
-    public void Dispose()
+    [Benchmark]
+    public HttpResponseMessage CallingResult()
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
+        return _httpClient!.GetAsync(_targetUri).Result;
     }
-    protected virtual void Dispose(bool disposing)
+    [Benchmark]
+    public async Task<HttpResponseMessage> CallingAsync()
     {
-        _httpClient.Dispose();
-        _cancellationTokenSource.Dispose();
+        return await _httpClient!.GetAsync(_targetUri).ConfigureAwait(false);
+    }
+    [Benchmark]
+    public async Task<HttpResponseMessage> CallingWithCancellationTokenAsync()
+    {
+        return await _httpClient!.GetAsync(_targetUri, _cancellationTokenSource!.Token).ConfigureAwait(false);
+    }
+
+    [GlobalCleanup]
+    public void GlobalCleanup()
+    {
+        _httpClient!.Dispose();
+        _cancellationTokenSource!.Dispose();
     }
 }
