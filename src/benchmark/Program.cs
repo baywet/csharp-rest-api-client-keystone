@@ -1,6 +1,3 @@
-﻿// See https://aka.ms/new-console-template for more information
-using benchmark.CallingResult;
+﻿using BenchmarkDotNet.Running;
 
-using BenchmarkDotNet.Running;
-
-var summary = BenchmarkRunner.Run<CallingResultBenchmark>();
+BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
