@@ -1,4 +1,4 @@
-# Proper Task Management
+# Task Management
 
 ## Guidelines
 

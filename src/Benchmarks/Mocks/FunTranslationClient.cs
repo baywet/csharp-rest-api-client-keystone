@@ -8,7 +8,7 @@ namespace Benchmarks.Mocks;
 
 public static class FunTranslationClient
 {
-    private const string ReturnJson =
+    internal const string ReturnJson =
         """
 		{
 			"success": {
