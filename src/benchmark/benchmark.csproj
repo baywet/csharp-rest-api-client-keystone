@@ -5,6 +5,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- Needed so additional rules trigger https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#analysismode -->
+    <AnalysisMode>All</AnalysisMode>
+    <!-- altneratively -->
+    <!-- <AnalysisModePerformance>All</AnalysisModePerformance> -->
+    <!-- Needed for projects < net5 -->
+    <!-- <EnableNETAnalyzers>true</EnableNETAnalyzers> -->
   </PropertyGroup>
 
   <ItemGroup>
