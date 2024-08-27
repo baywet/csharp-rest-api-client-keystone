@@ -1,8 +1,8 @@
-using benchmark.Mocks;
+using Benchmarks.Mocks;
 
 using BenchmarkDotNet.Attributes;
 
-namespace benchmark.CallingResult;
+namespace Benchmarks.CallingResult;
 [ShortRunJob]
 [MemoryDiagnoser]
 #pragma warning disable CA1001 // Types that own disposable fields should be disposable

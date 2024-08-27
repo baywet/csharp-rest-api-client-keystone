@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{61E897A0-FABC-4B75-9FB1-F4D9021C60A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "benchmark", "src\benchmark\benchmark.csproj", "{4204C84D-38D9-4E8B-BFA9-A1EF1A6A5610}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "src\Benchmarks\Benchmarks.csproj", "{4204C84D-38D9-4E8B-BFA9-A1EF1A6A5610}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

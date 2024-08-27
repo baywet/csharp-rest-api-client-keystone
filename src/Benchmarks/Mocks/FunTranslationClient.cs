@@ -4,7 +4,7 @@ using System.Net.Http.Headers;
 using Moq;
 using Moq.Protected;
 
-namespace benchmark.Mocks;
+namespace Benchmarks.Mocks;
 
 public static class FunTranslationClient
 {
