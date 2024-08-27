@@ -19,4 +19,4 @@
 ## Rules
 
 - [CA1849](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1849)
-- Additional rule necessary to require sync to async conversion of caller.
+- [VSTHRD002](https://github.com/Microsoft/vs-threading/blob/main/doc/analyzers/VSTHRD002.md)
