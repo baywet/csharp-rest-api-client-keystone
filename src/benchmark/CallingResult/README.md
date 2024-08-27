@@ -1,0 +1,22 @@
+# Proper Task Management
+
+## Guidelines
+
+- MUST NOT call .Result on a Task.
+- MUST NOT call .GetAwaiter().GetResult on a Task.
+- A method calling an async method MUST be async itself and MUST return Task, Task of T or ValueTask equivalents.
+- WHen a service or a library MUST pass the cancellation token from the caller to the callee.
+
+## Results
+
+| Method                            | Mean     | Error     | StdDev    | Gen0   | Gen1   | Allocated |
+|---------------------------------- |---------:|----------:|----------:|-------:|-------:|----------:|
+| CallingResult                     | 3.392 us | 6.4680 us | 0.3545 us | 0.1221 | 0.0458 |     768 B |
+| CallingGetResult                  | 3.219 us | 6.5425 us | 0.3586 us | 0.1221 | 0.0420 |     768 B |
+| CallingAsync                      | 1.924 us | 4.6868 us | 0.2569 us | 0.1335 | 0.0458 |     840 B |
+| CallingWithCancellationTokenAsync | 2.393 us | 0.5324 us | 0.0292 us | 0.1335 | 0.0458 |     856 B |
+
+## Rules
+
+- [CA1849](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1849)
+- Additional rule necessary to require sync to async conversion of caller.

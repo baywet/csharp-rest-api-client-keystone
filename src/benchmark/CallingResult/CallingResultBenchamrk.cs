@@ -25,6 +25,11 @@ public class CallingResultBenchmark
         return _httpClient!.GetAsync(_targetUri).Result;
     }
     [Benchmark]
+    public HttpResponseMessage CallingGetResult()
+    {
+        return _httpClient!.GetAsync(_targetUri).GetAwaiter().GetResult();
+    }
+    [Benchmark]
     public async Task<HttpResponseMessage> CallingAsync()
     {
         return await _httpClient!.GetAsync(_targetUri).ConfigureAwait(false);
