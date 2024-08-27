@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
+
 using Moq;
 using Moq.Protected;
 
@@ -7,8 +8,8 @@ namespace benchmark.Mocks;
 
 public static class FunTranslationClient
 {
-	private const string returnJson = 
-		"""
+    private const string returnJson =
+        """
 		{
 			"success": {
 				"total": 1
@@ -20,22 +21,22 @@ public static class FunTranslationClient
 			}
 		}
 		""";
-	public static HttpClient GetHttpClient()
-	{
-		var responseMessage = new HttpResponseMessage
-		{
-			StatusCode = HttpStatusCode.OK,
-			Content = new StringContent(returnJson, MediaTypeHeaderValue.Parse("application/json"))
-		};
-		var mockMessageHandler = new Mock<HttpMessageHandler>();
-		mockMessageHandler.Protected()
-			.Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
-			.ReturnsAsync(responseMessage);
+    public static HttpClient GetHttpClient()
+    {
+        var responseMessage = new HttpResponseMessage
+        {
+            StatusCode = HttpStatusCode.OK,
+            Content = new StringContent(returnJson, MediaTypeHeaderValue.Parse("application/json"))
+        };
+        var mockMessageHandler = new Mock<HttpMessageHandler>();
+        mockMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(responseMessage);
 
-		// mockMessageHandler.Protected()
-		// 	.Setup<HttpResponseMessage>("Send", It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>())
-		// 	.Returns(responseMessage);
-		
-		return new HttpClient(mockMessageHandler.Object);
-	}
+        // mockMessageHandler.Protected()
+        // 	.Setup<HttpResponseMessage>("Send", It.IsAny<HttpRequestMessage>(), It.IsAny<CancellationToken>())
+        // 	.Returns(responseMessage);
+
+        return new HttpClient(mockMessageHandler.Object);
+    }
 }
