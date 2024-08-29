@@ -10,9 +10,11 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
-using Newtonsoft.Json;
 using System;
 using Xunit;
+using System.Threading.Tasks;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace TestHelper
 {
@@ -26,51 +28,37 @@ namespace TestHelper
 
         private string DataSourcePath { get; }
 
-        private static string ReadIfExists(string path)
+        protected async Task VerifyCSharpByConventionAsync([CallerMemberName]string testName = null, CancellationToken cancellationToken = default)
         {
-            if (!File.Exists(path)) return string.Empty;
-            return File.ReadAllText(path);
+            await VerifyCSharpByConventionV2Async(testName, cancellationToken);
         }
 
-        protected void VerifyCSharpByConvention([CallerMemberName]string testName = null)
-        {
-            var sourcePath = Path.Combine(DataSourcePath, testName, "Source");
-            VerifyCSharpByConventionV2(testName);
-        }
-
-        private void VerifyCSharpByConventionV2(string testName)
+        private async Task VerifyCSharpByConventionV2Async(string testName, CancellationToken cancellationToken)
         {
             var sources = ReadSources(testName);
-            var expectedResults = ReadDiagnosticResultsFromFolder(testName);
+            var expectedResults = await ReadDiagnosticResultsFromFolderAsync(testName, cancellationToken);
             var expectedSources = ReadExpectedSources(testName);
 
-            VerifyCSharp(sources, expectedResults.ToArray(), expectedSources.ToArray());
+            await VerifyCSharpAsync(sources, expectedResults.ToArray(), expectedSources.ToArray());
         }
 
-        private IEnumerable<DiagnosticResult> ReadDiagnosticResultsFromFolder(string testName)
+        private async Task<IEnumerable<DiagnosticResult>> ReadDiagnosticResultsFromFolderAsync(string testName, CancellationToken cancellationToken)
         {
             var diagnosticPath = Path.Combine(DataSourcePath, testName, "Diagnostic");
 
             if (!Directory.Exists(diagnosticPath))
                 return Array.Empty<DiagnosticResult>();
 
-            var results = ReadResultsFromFolder(diagnosticPath);
+            var results = await ReadResultsFromFolderAsync(diagnosticPath, cancellationToken);
 
             return GetDiagnosticResult(results);
         }
 
-        private IEnumerable<Result> ReadResultsFromFolder(string diagnosticPath)
+        private async Task<IEnumerable<Result>> ReadResultsFromFolderAsync(string diagnosticPath, CancellationToken cancellationToken)
         {
-            foreach (var file in Directory.GetFiles(diagnosticPath, "*.json"))
-            {
-                if (file.EndsWith("action.json", System.StringComparison.InvariantCultureIgnoreCase))
-                    continue;
-
-                foreach (var r in ReadResults(file))
-                {
-                    yield return r;
-                }
-            }
+            return (await Task.WhenAll(Directory.GetFiles(diagnosticPath, "*.json")
+                            .Where(static x => x.EndsWith("action.json", StringComparison.InvariantCultureIgnoreCase))
+                            .Select(x => ReadResultsAsync(x, cancellationToken)))).SelectMany(static x => x);
         }
 
 
@@ -85,9 +73,9 @@ namespace TestHelper
         {
             var testPath = Path.Combine(DataSourcePath, testName);
 
-            var exprectedFolders = Directory.GetDirectories(testPath, "Expected*");
+            var expectedFolders = Directory.GetDirectories(testPath, "Expected*");
 
-            foreach (var expectedPath in exprectedFolders)
+            foreach (var expectedPath in expectedFolders)
             {
                 var m = System.Text.RegularExpressions.Regex.Match(expectedPath, @"\d+$");
                 var index = m.Success ? int.Parse(m.Value) : 0;
@@ -129,7 +117,7 @@ namespace TestHelper
             }
         }
 
-        private void VerifyCSharp(Dictionary<string, string> sources, DiagnosticResult[] expectedResults, params FixResult[] fixResults)
+        private async Task VerifyCSharpAsync(Dictionary<string, string> sources, DiagnosticResult[] expectedResults, params FixResult[] fixResults)
         {
             var analyzer = GetCSharpDiagnosticAnalyzer();
             var fix = GetCSharpCodeFixProvider();
@@ -141,7 +129,7 @@ namespace TestHelper
 
             foreach (var fixResult in fixResults)
             {
-                var project = ApplyFix(originalProject, analyzer, fix, fixResult.Index);
+                var project = await ApplyFixAsync(originalProject, analyzer, fix, fixResult.Index);
 
                 var expectedSources = fixResult.ExpectedSources;
 
@@ -167,7 +155,7 @@ namespace TestHelper
             }
         }
 
-        private static Project ApplyFix(Project project, DiagnosticAnalyzer analyzer, CodeFixProvider fix, int fixIndex)
+        private static async Task<Project> ApplyFixAsync(Project project, DiagnosticAnalyzer analyzer, CodeFixProvider fix, int fixIndex)
         {
             var diagnostics = GetDiagnostics(project, analyzer);
             var fixableDiagnostics = diagnostics.Where(d => fix.FixableDiagnosticIds.Contains(d.Id)).ToArray();
@@ -186,10 +174,10 @@ namespace TestHelper
                 }
 
                 var actions = new List<CodeAction>();
-                var fixContex = new CodeFixContext(doc, diag, (a, d) => actions.Add(a), CancellationToken.None);
-                fix.RegisterCodeFixesAsync(fixContex).Wait();
+                var fixContext = new CodeFixContext(doc, diag, (a, d) => actions.Add(a), CancellationToken.None);
+                await fix.RegisterCodeFixesAsync(fixContext);
 
-                if (!actions.Any())
+                if (actions.Count == 0)
                 {
                     break;
                 }
@@ -231,9 +219,6 @@ namespace TestHelper
 
         protected Project CreateProject(Dictionary<string, string> sources)
         {
-            string fileNamePrefix = DefaultFilePathPrefix;
-            string fileExt = CSharpDefaultFileExt;
-
             var projectId = ProjectId.CreateNewId(debugName: TestProjectName);
 
             var solution = new AdhocWorkspace()
@@ -279,13 +264,14 @@ namespace TestHelper
             }
         }
 
-        private IEnumerable<Result> ReadResults(string path)
+        private async Task<IEnumerable<Result>> ReadResultsAsync(string path, CancellationToken cancellationToken)
         {
             if (!File.Exists(path)) return Array.Empty<Result>();
 
             try
             {
-                var result = JsonConvert.DeserializeObject<Result>(File.ReadAllText(path));
+                using var stream = File.OpenRead(path);
+                var result = await JsonSerializer.DeserializeAsync<Result>(stream, ResultSerializationContext.Default.Options, cancellationToken: cancellationToken);
                 return new[] { result };
             }
             catch
@@ -295,7 +281,8 @@ namespace TestHelper
             // backward compatibility
             try
             {
-                var results = JsonConvert.DeserializeObject<Result[]>(File.ReadAllText(path));
+                using var stream = File.OpenRead(path);
+                var results = await JsonSerializer.DeserializeAsync<Result[]>(stream, ResultSerializationContext.Default.Options, cancellationToken: cancellationToken);
                 return results;
             }
             catch
@@ -304,28 +291,31 @@ namespace TestHelper
 
             return Array.Empty<Result>();
         }
-
-        private class Result
-        {
-            [JsonProperty(PropertyName = "id")]
-            public string Id { get; set; }
-
-            [JsonProperty(PropertyName = "sevirity")]
-            public DiagnosticSeverity Sevirity { get; set; }
-
-            [JsonProperty(PropertyName = "line")]
-            public int Line { get; set; }
-
-            [JsonProperty(PropertyName = "column")]
-            public int Column { get; set; }
-
-            [JsonProperty(PropertyName = "path")]
-            public string Path { get; set; }
-
-            [JsonProperty(PropertyName = "message-args")]
-            public string[] MessageArgs { get; set; }
-        }
-
         #endregion
+    }
+    internal class Result
+    {
+        [JsonPropertyName("id")]
+        public string Id { get; set; }
+
+        [JsonPropertyName("sevirity")]
+        public DiagnosticSeverity Sevirity { get; set; }
+
+        [JsonPropertyName("line")]
+        public int Line { get; set; }
+
+        [JsonPropertyName("column")]
+        public int Column { get; set; }
+
+        [JsonPropertyName("path")]
+        public string Path { get; set; }
+
+        [JsonPropertyName("message-args")]
+        public string[] MessageArgs { get; set; }
+    }
+    [JsonSerializable(typeof(Result))]
+    internal partial class ResultSerializationContext : JsonSerializerContext
+    {
+
     }
 }

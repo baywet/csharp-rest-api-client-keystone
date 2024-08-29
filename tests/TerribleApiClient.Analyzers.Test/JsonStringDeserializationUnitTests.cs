@@ -5,16 +5,17 @@ using System;
 using TestHelper;
 using Xunit;
 using TerribleApiClient.Analyzers;
+using System.Threading.Tasks;
 
 namespace TerribleApiClient.Analyzers.Test
 {
     public class JsonStringDeserializationUnitTests : ConventionCodeFixVerifier
     {
         [Fact]
-        public void EmptySource() => VerifyCSharpByConvention();
+        public Task EmptySourceAsync() => VerifyCSharpByConventionAsync();
 
         [Fact]
-        public void LowercaseLetters() => VerifyCSharpByConvention();
+        public Task LowercaseLettersAsync() => VerifyCSharpByConventionAsync();
 
         protected override CodeFixProvider GetCSharpCodeFixProvider() => new JsonStringDeserializationCodeFixProvider();
 
