@@ -19,5 +19,6 @@
 ## Rules
 
 - [CA1849](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1849)
+- [CA2016](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca2016)
 - [VSTHRD002](https://github.com/Microsoft/vs-threading/blob/main/doc/analyzers/VSTHRD002.md)
 - [VSTHRD100](https://github.com/microsoft/vs-threading/blob/main/doc/analyzers/VSTHRD100.md)
