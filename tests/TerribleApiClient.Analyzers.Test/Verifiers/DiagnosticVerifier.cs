@@ -103,8 +103,7 @@ namespace TestHelper
             {
                 string diagnosticsOutput = actualResults.Any() ? FormatDiagnostics(analyzer, actualResults.ToArray()) : "    NONE.";
 
-                Assert.True(false,
-                    string.Format("Mismatch between number of diagnostics returned, expected \"{0}\" actual \"{1}\"\r\n\r\nDiagnostics:\r\n{2}\r\n", expectedCount, actualCount, diagnosticsOutput));
+                Assert.Fail(string.Format("Mismatch between number of diagnostics returned, expected \"{0}\" actual \"{1}\"\r\n\r\nDiagnostics:\r\n{2}\r\n", expectedCount, actualCount, diagnosticsOutput));
             }
 
             for (int i = 0; i < expectedResults.Length; i++)
@@ -116,8 +115,7 @@ namespace TestHelper
                 {
                     if (actual.Location != Location.None)
                     {
-                        Assert.True(false,
-                            string.Format("Expected:\nA project diagnostic with No location\nActual:\n{0}",
+                        Assert.Fail(string.Format("Expected:\nA project diagnostic with No location\nActual:\n{0}",
                             FormatDiagnostics(analyzer, actual)));
                     }
                 }

@@ -1,7 +1,7 @@
 ﻿[
   {
-    "id": "TerribleApiClient.Analyzers",
-    "sevirity": "Warning",
+    "id": "DJSON002",
+    "severity": "Warning",
     "line": 10,
     "column": 11,
     "path": "Class1.csx",

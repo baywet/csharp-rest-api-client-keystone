@@ -57,7 +57,7 @@ namespace TestHelper
         private async Task<IEnumerable<Result>> ReadResultsFromFolderAsync(string diagnosticPath, CancellationToken cancellationToken)
         {
             return (await Task.WhenAll(Directory.GetFiles(diagnosticPath, "*.json")
-                            .Where(static x => x.EndsWith("action.json", StringComparison.InvariantCultureIgnoreCase))
+                            .Where(static x => !x.EndsWith("action.json", StringComparison.InvariantCultureIgnoreCase))
                             .Select(x => ReadResultsAsync(x, cancellationToken)))).SelectMany(static x => x);
         }
 
@@ -258,7 +258,7 @@ namespace TestHelper
                 {
                     Id = r.Id,
                     Message = r.MessageArgs == null ? diag.MessageFormat.ToString() : string.Format(diag.MessageFormat.ToString(), (object[])r.MessageArgs),
-                    Severity = r.Sevirity,
+                    Severity = r.Severity,
                     Locations = new[] { new DiagnosticResultLocation(r.Path ?? "Source.cs", r.Line, r.Column) },
                 };
             }
@@ -266,40 +266,36 @@ namespace TestHelper
 
         private async Task<IEnumerable<Result>> ReadResultsAsync(string path, CancellationToken cancellationToken)
         {
-            if (!File.Exists(path)) return Array.Empty<Result>();
+            if (!File.Exists(path)) return [];
 
             try
             {
                 using var stream = File.OpenRead(path);
-                var result = await JsonSerializer.DeserializeAsync<Result>(stream, ResultSerializationContext.Default.Options, cancellationToken: cancellationToken);
-                return new[] { result };
+                var result = await JsonSerializer.DeserializeAsync(stream, SerializationContext.Result, cancellationToken: cancellationToken);
+                return [result];
             }
             catch
             {
-            }
-
-            // backward compatibility
-            try
-            {
+                // backward compatibility
                 using var stream = File.OpenRead(path);
-                var results = await JsonSerializer.DeserializeAsync<Result[]>(stream, ResultSerializationContext.Default.Options, cancellationToken: cancellationToken);
+                var results = await JsonSerializer.DeserializeAsync(stream, SerializationContext.ResultArray, cancellationToken: cancellationToken);
                 return results;
             }
-            catch
-            {
-            }
-
-            return Array.Empty<Result>();
         }
         #endregion
+        private static readonly ResultSerializationContext SerializationContext = new(
+            new JsonSerializerOptions {
+                Converters = { new JsonStringEnumConverter()
+            }
+        });
     }
     internal class Result
     {
         [JsonPropertyName("id")]
         public string Id { get; set; }
 
-        [JsonPropertyName("sevirity")]
-        public DiagnosticSeverity Sevirity { get; set; }
+        [JsonPropertyName("severity")]
+        public DiagnosticSeverity Severity { get; set; }
 
         [JsonPropertyName("line")]
         public int Line { get; set; }
@@ -314,6 +310,7 @@ namespace TestHelper
         public string[] MessageArgs { get; set; }
     }
     [JsonSerializable(typeof(Result))]
+    [JsonSerializable(typeof(Result[]))]
     internal partial class ResultSerializationContext : JsonSerializerContext
     {
 
