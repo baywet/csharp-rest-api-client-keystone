@@ -184,7 +184,7 @@ namespace TestHelper
 
                 var codeAction = actions[fixIndex];
 
-                var operations = codeAction.GetOperationsAsync(CancellationToken.None).Result;
+                var operations = await codeAction.GetOperationsAsync(CancellationToken.None);
                 var solution = operations.OfType<ApplyChangesOperation>().Single().ChangedSolution;
                 project = solution.GetProject(project.Id);
 

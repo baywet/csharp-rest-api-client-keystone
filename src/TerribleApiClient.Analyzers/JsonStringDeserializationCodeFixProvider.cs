@@ -38,30 +38,33 @@ namespace TerribleApiClient.Analyzers
         var diagnostic = context.Diagnostics[0];
         var diagnosticSpan = diagnostic.Location.SourceSpan;
 
-        var literalExpression = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<LiteralExpressionSyntax>().First();
+        var literalExpression = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<IdentifierNameSyntax>().First();
 
         context.RegisterCodeFix(
             CodeAction.Create(
                 title: Title,
-                createChangedDocument: c => ReplaceStringLiteralAsync(context.Document, literalExpression, c),
+                createChangedDocument: c => ReplaceStringIdentifierAsync(context.Document, literalExpression, c),
                 equivalenceKey: Title),
             diagnostic);
     }
 
-    private async Task<Document> ReplaceStringLiteralAsync(Document document, LiteralExpressionSyntax literalExpression, CancellationToken cancellationToken)
+    private async Task<Document> ReplaceStringIdentifierAsync(Document document, IdentifierNameSyntax identifierSyntax, CancellationToken cancellationToken)
     {
         var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
         var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
         var generator = SyntaxGenerator.GetGenerator(document);
 
-        var methodDeclaration = literalExpression.Ancestors().OfType<MethodDeclarationSyntax>().First();
+        var methodDeclaration = identifierSyntax.Ancestors().OfType<MethodDeclarationSyntax>().First();
         var streamVariable = methodDeclaration.DescendantNodes()
             .OfType<VariableDeclaratorSyntax>()
-            .FirstOrDefault(v => semanticModel.GetTypeInfo(v.Initializer.Value).Type.Name.Equals("Stream", StringComparison.Ordinal));
+            .Where(v => v.Initializer != null)
+            .FirstOrDefault(v => semanticModel.GetTypeInfo(v.Initializer.Value).Type.Name.Equals("MemoryStream", StringComparison.Ordinal));
+            //TODO check the namespace of the symbol
+            //TODO check if the type implements stream instead
         if (streamVariable != null)
         {
             var streamIdentifier = generator.IdentifierName(streamVariable.Identifier.Text);
-            var newRoot = root.ReplaceNode(literalExpression, streamIdentifier);
+            var newRoot = root.ReplaceNode(identifierSyntax, streamIdentifier);
             return document.WithSyntaxRoot(newRoot);
         }
 

@@ -35,11 +35,10 @@ namespace TerribleApiClient.Analyzers
             //TODO check the namespace of the symbol
             if (invocationExpr.ArgumentList.Arguments is not {Count:> 0} argumentList) return;
             var firstArgument = argumentList[0].Expression;
-            if (firstArgument is LiteralExpressionSyntax literal && literal.IsKind(SyntaxKind.StringLiteralExpression) ||
-                firstArgument is IdentifierNameSyntax && 
+            if (firstArgument is IdentifierNameSyntax && 
                     context.SemanticModel.GetSymbolInfo(firstArgument).Symbol is ILocalSymbol localSymbol &&
                     localSymbol.Type.Name.Equals("String", StringComparison.Ordinal) &&
-                    localSymbol.Type.ContainingNamespace.Name.Equals("System", StringComparison.Ordinal))
+                    localSymbol.Type.ContainingNamespace.Name.Equals(nameof(System), StringComparison.Ordinal))
             {
                 var diagnostic = Diagnostic.Create(Rule, firstArgument.GetLocation());
                 context.ReportDiagnostic(diagnostic);
