@@ -19,6 +19,4 @@
     <ProjectReference Include="..\..\src\TerribleApiClient.Analyzers\TerribleApiClient.Analyzers.csproj" />
   </ItemGroup>
 
-  <ProjectExtensions><VisualStudio><UserProperties DataSource_4TerribleApiClient.AnalyzersUnitTests_4LowercaseLetters_4Diagnostic_4Results_1json__JSONSchema="result-schama-v2" /></VisualStudio></ProjectExtensions>
-
 </Project>

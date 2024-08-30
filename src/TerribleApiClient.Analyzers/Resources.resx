@@ -119,14 +119,14 @@
   </resheader>
   <data name="AnalyzerDescription" xml:space="preserve">
     <value>Type names should be all uppercase.</value>
-    <comment>An optional longer localizable description of the diagnostic.</comment>
+    <comment>Using intermediate strings during deserialization leads to poor performance and streams should be used instead.</comment>
   </data>
   <data name="AnalyzerMessageFormat" xml:space="preserve">
-    <value>Type name '{0}' contains lowercase letters</value>
+    <value>Avoid using strings for JSON deserialization</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
   <data name="AnalyzerTitle" xml:space="preserve">
-    <value>Type name contains lowercase letters</value>
+    <value>String used for JSON deserialization</value>
     <comment>The title of the diagnostic.</comment>
   </data>
 </root>

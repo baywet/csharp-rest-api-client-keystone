@@ -15,7 +15,7 @@ namespace TerribleApiClient.Analyzers.Test
         public Task EmptySourceAsync() => VerifyCSharpByConventionAsync();
 
         [Fact]
-        public Task LowercaseLettersAsync() => VerifyCSharpByConventionAsync();
+        public Task StringInUseAsync() => VerifyCSharpByConventionAsync();
 
         protected override CodeFixProvider GetCSharpCodeFixProvider() => new JsonStringDeserializationCodeFixProvider();
 
