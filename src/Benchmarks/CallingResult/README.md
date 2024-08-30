@@ -5,7 +5,8 @@
 - MUST NOT call .Result on a Task.
 - MUST NOT call .GetAwaiter().GetResult on a Task.
 - A method calling an async method MUST be async itself and MUST return Task, Task of T or ValueTask equivalents.
-- WHen a service or a library MUST pass the cancellation token from the caller to the callee.
+- When a service or a library MUST pass the cancellation token from the caller to the callee.
+- MUST call ConfigureAwait when awaiting a Task.
 
 ## Results
 
