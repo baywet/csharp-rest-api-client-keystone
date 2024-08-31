@@ -55,8 +55,7 @@ namespace TerribleApiClient.Analyzers
             var streamVariable = methodDeclaration.DescendantNodes()
                 .OfType<VariableDeclaratorSyntax>()
                 .Where(v => v.Initializer != null)
-                .FirstOrDefault(v => semanticModel.GetTypeInfo(v.Initializer.Value).Type.Name.Equals("MemoryStream", StringComparison.Ordinal));
-            //TODO check the namespace of the symbol
+                .FirstOrDefault(v => semanticModel.GetTypeInfo(v.Initializer.Value).Type.IsExpectedType("MemoryStream", "System.IO"));
             //TODO check if the type implements stream instead
             return streamVariable;
         }

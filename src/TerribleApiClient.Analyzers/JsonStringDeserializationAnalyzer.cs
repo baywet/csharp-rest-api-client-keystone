@@ -16,7 +16,7 @@ namespace TerribleApiClient.Analyzers
         private static readonly LocalizableString Description = new LocalizableResourceString(nameof(Resources.AnalyzerDescription), Resources.ResourceManager, typeof(Resources));
         private const string Category = "Naming";
 
-        private static DiagnosticDescriptor Rule = new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: Description);
+        private static readonly DiagnosticDescriptor Rule = new(DiagnosticId, Title, MessageFormat, Category, DiagnosticSeverity.Warning, isEnabledByDefault: true, description: Description);
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(Rule); } }
 
@@ -32,12 +32,14 @@ namespace TerribleApiClient.Analyzers
             if (context.Node is not InvocationExpressionSyntax invocationExpr) return;
             if (invocationExpr.Expression is not MemberAccessExpressionSyntax memberAccessExpr) return;
             if (!memberAccessExpr.Name.Identifier.Text.Equals("Deserialize", StringComparison.Ordinal)) return;
-            //TODO check the namespace of the symbol
+            if (context.SemanticModel.GetSymbolInfo(memberAccessExpr).Symbol is not IMethodSymbol methodSymbol ||
+                methodSymbol.ReceiverType is not INamedTypeSymbol receiverTypeSymbol ||
+                !receiverTypeSymbol.IsExpectedType("JsonSerializer", "System.Text.Json")) return;
             if (invocationExpr.ArgumentList.Arguments is not {Count:> 0} argumentList) return;
             var firstArgument = argumentList[0].Expression;
             if (firstArgument is IdentifierNameSyntax && 
                     context.SemanticModel.GetSymbolInfo(firstArgument).Symbol is ILocalSymbol localSymbol &&
-                    localSymbol.Type.Name.Equals("String", StringComparison.Ordinal) &&
+                    localSymbol.Type.Name.Equals(nameof(String), StringComparison.Ordinal) &&
                     localSymbol.Type.ContainingNamespace.Name.Equals(nameof(System), StringComparison.Ordinal))
             {
                 var diagnostic = Diagnostic.Create(Rule, firstArgument.GetLocation());

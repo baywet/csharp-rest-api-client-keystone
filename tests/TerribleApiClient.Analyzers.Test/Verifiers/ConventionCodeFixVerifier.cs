@@ -15,6 +15,7 @@ using Xunit;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace TestHelper
 {
@@ -35,9 +36,9 @@ namespace TestHelper
 
         private async Task VerifyCSharpByConventionV2Async(string testName, CancellationToken cancellationToken)
         {
-            var sources = ReadSources(testName);
+            var sources = await ReadSourcesAsync(testName, cancellationToken);
             var expectedResults = await ReadDiagnosticResultsFromFolderAsync(testName, cancellationToken);
-            var expectedSources = ReadExpectedSources(testName);
+            var expectedSources = await ReadExpectedSourcesAsync(testName, cancellationToken);
 
             await VerifyCSharpAsync(sources, expectedResults.ToArray(), expectedSources.ToArray());
         }
@@ -62,29 +63,29 @@ namespace TestHelper
         }
 
 
-        private Dictionary<string, string> ReadSources(string testName)
+        private async Task<Dictionary<string, string>> ReadSourcesAsync(string testName, CancellationToken cancellationToken)
         {
             var sourcePath = Path.Combine(DataSourcePath, testName, "Source");
 
-            return ReadFiles(sourcePath);
+            return await ReadFilesAsync(sourcePath, cancellationToken);
         }
-
-        private IEnumerable<FixResult> ReadExpectedSources(string testName)
+        private static readonly Regex ExpectedFolderRegex = new(@"\d+$", RegexOptions.Compiled);
+        private async Task<IEnumerable<FixResult>> ReadExpectedSourcesAsync(string testName, CancellationToken cancellationToken)
         {
             var testPath = Path.Combine(DataSourcePath, testName);
 
             var expectedFolders = Directory.GetDirectories(testPath, "Expected*");
 
-            foreach (var expectedPath in expectedFolders)
+            return await Task.WhenAll(expectedFolders.Select(async x => 
             {
-                var m = System.Text.RegularExpressions.Regex.Match(expectedPath, @"\d+$");
+                var m = ExpectedFolderRegex.Match(x);
                 var index = m.Success ? int.Parse(m.Value) : 0;
 
-                yield return new FixResult(index, ReadFiles(expectedPath));
-            }
+                return new FixResult(index, await ReadFilesAsync(x, cancellationToken));
+            }));
         }
 
-        private static Dictionary<string, string> ReadFiles(string sourcePath)
+        private static async Task<Dictionary<string, string>> ReadFilesAsync(string sourcePath, CancellationToken cancellationToken)
         {
             if (!Directory.Exists(sourcePath))
                 return null;
@@ -93,7 +94,7 @@ namespace TestHelper
 
             foreach (var file in Directory.GetFiles(sourcePath, "*.csx"))
             {
-                var code = File.ReadAllText(file);
+                var code = await File.ReadAllTextAsync(file, cancellationToken);
                 var name = Path.GetFileName(file);
                 sources.Add(name, code);
             }
@@ -133,7 +134,7 @@ namespace TestHelper
 
                 var expectedSources = fixResult.ExpectedSources;
 
-                if (expectedSources == null || !expectedSources.Any())
+                if (expectedSources == null || expectedSources.Count == 0)
                     return;
 
                 var actualSources = new Dictionary<string, string>();
@@ -191,7 +192,7 @@ namespace TestHelper
                 fixableDiagnostics = GetDiagnostics(project, analyzer)
                     .Where(d => fix.FixableDiagnosticIds.Contains(d.Id)).ToArray();
 
-                if (!fixableDiagnostics.Any()) break;
+                if (fixableDiagnostics.Length == 0) break;
             }
 
             return project;
@@ -204,16 +205,14 @@ namespace TestHelper
             return diagnostics.OrderBy(d => d.Location.SourceSpan.Start).ToArray();
         }
 
-        protected virtual IEnumerable<MetadataReference> References
-        {
-            get
-            {
-                yield return MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
-                yield return MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location);
-                yield return MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location);
-                yield return MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location);
-            }
-        }
+        protected static readonly IEnumerable<MetadataReference> References =
+        [
+            MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(JsonSerializer).Assembly.Location),
+        ];
 
         protected virtual CSharpCompilationOptions CompilationOptions => new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
 
