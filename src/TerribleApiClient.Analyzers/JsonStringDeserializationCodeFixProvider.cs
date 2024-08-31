@@ -55,8 +55,7 @@ namespace TerribleApiClient.Analyzers
             var streamVariable = methodDeclaration.DescendantNodes()
                 .OfType<VariableDeclaratorSyntax>()
                 .Where(v => v.Initializer != null)
-                .FirstOrDefault(v => semanticModel.GetTypeInfo(v.Initializer.Value).Type.IsExpectedType("MemoryStream", "System.IO"));
-            //TODO check if the type implements stream instead
+                .FirstOrDefault(v => semanticModel.GetTypeInfo(v.Initializer.Value).Type.ContainsBaseTypeInHierarchy("Stream", "System.IO"));
             return streamVariable;
         }
 

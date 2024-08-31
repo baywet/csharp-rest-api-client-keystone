@@ -14,4 +14,11 @@ public static class ISymbolExtensions
                 (string.IsNullOrEmpty(expectedNamespaceName)
                     || symbol.ContainingNamespace.ToDisplayString().Equals(expectedNamespaceName, StringComparison.Ordinal));
     }
+    public static bool ContainsBaseTypeInHierarchy(this ITypeSymbol typeSymbol, string expectedSymbolName, string expectedNamespaceName = "")
+    {
+        return typeSymbol is not null &&
+                (typeSymbol.IsExpectedType(expectedSymbolName, expectedNamespaceName) ||
+                    typeSymbol.BaseType is not null &&
+                    typeSymbol.BaseType.ContainsBaseTypeInHierarchy(expectedSymbolName, expectedNamespaceName));
+    }
 }
