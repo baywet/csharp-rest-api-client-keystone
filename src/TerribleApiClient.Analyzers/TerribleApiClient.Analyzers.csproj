@@ -21,6 +21,7 @@
     <PackageTags>TerribleApiClient.Analyzers, analyzers</PackageTags>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
    
   <ItemGroup>
