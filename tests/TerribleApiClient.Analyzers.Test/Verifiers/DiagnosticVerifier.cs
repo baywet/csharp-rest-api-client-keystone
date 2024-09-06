@@ -96,7 +96,7 @@ namespace TestHelper
         /// <param name="expectedResults">Diagnostic Results that should have appeared in the code</param>
         protected static void VerifyDiagnosticResults(IEnumerable<Diagnostic> actualResults, DiagnosticAnalyzer analyzer, params DiagnosticResult[] expectedResults)
         {
-            int expectedCount = expectedResults.Count();
+            int expectedCount = expectedResults.Length;
             int actualCount = actualResults.Count();
 
             if (expectedCount != actualCount)

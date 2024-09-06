@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using System.Net.Http;
 
 namespace TestHelper
 {
@@ -48,7 +49,7 @@ namespace TestHelper
             var diagnosticPath = Path.Combine(DataSourcePath, testName, "Diagnostic");
 
             if (!Directory.Exists(diagnosticPath))
-                return Array.Empty<DiagnosticResult>();
+                return [];
 
             var results = await ReadResultsFromFolderAsync(diagnosticPath, cancellationToken);
 
@@ -212,6 +213,7 @@ namespace TestHelper
             MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(JsonSerializer).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(HttpClient).Assembly.Location),
         ];
 
         protected virtual CSharpCompilationOptions CompilationOptions => new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
