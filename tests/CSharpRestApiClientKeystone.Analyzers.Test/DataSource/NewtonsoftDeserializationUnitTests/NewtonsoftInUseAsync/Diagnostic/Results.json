@@ -3,7 +3,7 @@
     "id": "DJSON001",
     "severity": "Warning",
     "line": 19,
-    "column": 58,
+    "column": 20,
     "path": "Class1.csx",
     "message-args": [ "TypeName" ]
   }

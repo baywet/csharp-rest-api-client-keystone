@@ -42,7 +42,7 @@ namespace CSharpRestApiClientKeystone.Analyzers
                     localSymbol.Type.Name.Equals(nameof(String), StringComparison.Ordinal) &&
                     localSymbol.Type.ContainingNamespace.Name.Equals(nameof(System), StringComparison.Ordinal))
             {
-                var diagnostic = Diagnostic.Create(Rule, firstArgument.GetLocation());
+                var diagnostic = Diagnostic.Create(Rule, invocationExpr.GetLocation());
                 context.ReportDiagnostic(diagnostic);
             }
         }
