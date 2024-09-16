@@ -31,7 +31,7 @@ Required tools:
 Running the benchmarks:
 
 ```shell
-gh repo clone baywet/csharp-rest-api-client-keystone`
+gh repo clone baywet/csharp-rest-api-client-keystone
 cd csharp-rest-api-client-keystone
 dotnet run --project src\Benchmarks\Benchmarks.csproj
 ```
