@@ -117,16 +117,28 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AnalyzerDescription" xml:space="preserve">
-    <value>Type names should be all uppercase.</value>
-    <comment>Using intermediate strings during deserialization leads to poor performance and streams should be used instead.</comment>
+  <data name="AnalyzerDescription001" xml:space="preserve">
+    <value>Using intermediate strings during deserialization leads to poor performance and streams should be used instead.</value>
+    <comment>The description for the analyzer.</comment>
   </data>
-  <data name="AnalyzerMessageFormat" xml:space="preserve">
+  <data name="AnalyzerMessageFormat001" xml:space="preserve">
     <value>Avoid using strings for JSON deserialization</value>
     <comment>The format-able message the diagnostic displays.</comment>
   </data>
-  <data name="AnalyzerTitle" xml:space="preserve">
+  <data name="AnalyzerTitle001" xml:space="preserve">
     <value>String used for JSON deserialization</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
+  <data name="AnalyzerDescription002" xml:space="preserve">
+    <value>Using System.Text.Json results in improved performances when compared with Newtonsoft.Json.</value>
+    <comment>The description for the analyzer.</comment>
+  </data>
+  <data name="AnalyzerMessageFormat002" xml:space="preserve">
+    <value>Avoid using newtonsoft for JSON deserialization</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+  <data name="AnalyzerTitle002" xml:space="preserve">
+    <value>Newtonsoft used for JSON deserialization</value>
     <comment>The title of the diagnostic.</comment>
   </data>
 </root>
