@@ -11,12 +11,12 @@ namespace ConsoleApplication1
 {
     class TypeName
     {
-        public async Task<object> DeserializeAsClassWithStringAndReflectionAsync()
+        public async Task<TypeName> DeserializeAsClassWithStringAndReflectionAsync()
         {
             using var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(""));
             using var streamReader = new StreamReader(memoryStream, leaveOpen: true);
             var strRepresentation = await streamReader.ReadToEndAsync().ConfigureAwait(false);
-            return JsonConvert.DeserializeObject<object>(strRepresentation);
+            return JsonConvert.DeserializeObject<TypeName>(strRepresentation);
         }
     }
 }

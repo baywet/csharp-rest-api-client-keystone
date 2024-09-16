@@ -38,34 +38,58 @@ namespace CSharpRestApiClientKeystone.Analyzers
             var diagnostic = context.Diagnostics[0];
             var diagnosticSpan = diagnostic.Location.SourceSpan;
 
-            var literalExpression = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<IdentifierNameSyntax>().First();
+            var invocationExpression = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<InvocationExpressionSyntax>().First();
 
-            if (await FindStreamVariableAsync(context.Document, literalExpression, context.CancellationToken) is VariableDeclaratorSyntax streamVariable)
-                context.RegisterCodeFix(
-                    CodeAction.Create(
-                        title: Title,
-                        createChangedDocument: c => ReplaceStringIdentifierAsync(context.Document, literalExpression, streamVariable, c),
-                        equivalenceKey: Title),
-                    diagnostic);
+            context.RegisterCodeFix(
+                CodeAction.Create(
+                    title: Title,
+                    createChangedDocument: c => ReplaceJsonConvertAsync(context.Document, invocationExpression, c),
+                    equivalenceKey: Title),
+                diagnostic);
         }
-        private async Task<VariableDeclaratorSyntax?> FindStreamVariableAsync(Document document, IdentifierNameSyntax identifierSyntax, CancellationToken cancellationToken)
-        {
-            var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-            var methodDeclaration = identifierSyntax.Ancestors().OfType<MethodDeclarationSyntax>().First();
-            var streamVariable = methodDeclaration.DescendantNodes()
-                .OfType<VariableDeclaratorSyntax>()
-                .Where(v => v.Initializer != null)
-                .FirstOrDefault(v => semanticModel.GetTypeInfo(v.Initializer.Value).Type.ContainsBaseTypeInHierarchy("Stream", "System.IO"));
-            return streamVariable;
-        }
+        private const string SystemTextJsonNamespace = "System.Text.Json";
+        private const string JsonSerializerType = "JsonSerializer";
+        private const string DeserializeMethodName = "Deserialize";
 
-        private async Task<Document> ReplaceStringIdentifierAsync(Document document, IdentifierNameSyntax identifierSyntax, VariableDeclaratorSyntax streamVariable, CancellationToken cancellationToken)
+        private async Task<Document> ReplaceJsonConvertAsync(Document document, InvocationExpressionSyntax invocationExpression, CancellationToken cancellationToken)
         {
             var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
-            var generator = SyntaxGenerator.GetGenerator(document);
-            var streamIdentifier = generator.IdentifierName(streamVariable.Identifier.Text);
-            var newRoot = root.ReplaceNode(identifierSyntax, streamIdentifier);
-            return document.WithSyntaxRoot(newRoot);
+            
+            // Extract the type arguments from the old invocation
+            var typeArgumentList = 
+                invocationExpression.Expression is MemberAccessExpressionSyntax memberAccess &&
+                memberAccess.Name is GenericNameSyntax gNSVal ?
+                gNSVal.TypeArgumentList : null;
+            
+            var argumentList = invocationExpression.ArgumentList;
+            // Apply the type arguments to the new invocation
+            var newInvocation = typeArgumentList != null
+                ? SyntaxFactory.InvocationExpression(
+                    SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        SyntaxFactory.IdentifierName(JsonSerializerType),
+                        SyntaxFactory.GenericName(
+                            SyntaxFactory.Identifier(DeserializeMethodName),
+                            typeArgumentList)),
+                    argumentList)
+                : SyntaxFactory.InvocationExpression(
+                    SyntaxFactory.MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        SyntaxFactory.IdentifierName(JsonSerializerType),
+                        SyntaxFactory.IdentifierName(DeserializeMethodName)),
+                    argumentList);
+
+            
+            root = root.ReplaceNode(invocationExpression, newInvocation);
+
+            // Ensure the using directive for System.Text.Json is present
+            var usingDirective = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName(SystemTextJsonNamespace));
+            if (root is CompilationUnitSyntax compilationUnit && !compilationUnit.Usings.Any(u => u.Name.ToString().Equals(SystemTextJsonNamespace, StringComparison.OrdinalIgnoreCase)))
+            {
+                root = compilationUnit.AddUsings(usingDirective);
+            }
+
+            return document.WithSyntaxRoot(root);
         }
     }
 }
