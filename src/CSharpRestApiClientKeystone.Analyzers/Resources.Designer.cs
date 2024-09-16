@@ -73,39 +73,6 @@ namespace CSharpRestApiClientKeystone.Analyzers
         /// <summary>
         ///   Looks up a localized string similar to Type names should be all uppercase..
         /// </summary>
-        internal static string AnalyzerDescription001
-        {
-            get
-            {
-                return ResourceManager.GetString("AnalyzerDescription001", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Type name &apos;{0}&apos; contains lowercase letters.
-        /// </summary>
-        internal static string AnalyzerMessageFormat001
-        {
-            get
-            {
-                return ResourceManager.GetString("AnalyzerMessageFormat001", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Type name contains lowercase letters.
-        /// </summary>
-        internal static string AnalyzerTitle001
-        {
-            get
-            {
-                return ResourceManager.GetString("AnalyzerTitle001", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Type names should be all uppercase..
-        /// </summary>
         internal static string AnalyzerDescription002
         {
             get
@@ -133,6 +100,39 @@ namespace CSharpRestApiClientKeystone.Analyzers
             get
             {
                 return ResourceManager.GetString("AnalyzerTitle002", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Type names should be all uppercase..
+        /// </summary>
+        internal static string AnalyzerDescription001
+        {
+            get
+            {
+                return ResourceManager.GetString("AnalyzerDescription001", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Type name &apos;{0}&apos; contains lowercase letters.
+        /// </summary>
+        internal static string AnalyzerMessageFormat001
+        {
+            get
+            {
+                return ResourceManager.GetString("AnalyzerMessageFormat001", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Type name contains lowercase letters.
+        /// </summary>
+        internal static string AnalyzerTitle001
+        {
+            get
+            {
+                return ResourceManager.GetString("AnalyzerTitle001", resourceCulture);
             }
         }
     }
