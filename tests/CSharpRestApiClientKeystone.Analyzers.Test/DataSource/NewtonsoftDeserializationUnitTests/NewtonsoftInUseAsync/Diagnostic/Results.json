@@ -1,9 +1,9 @@
 ﻿[
   {
-    "id": "DJSON002",
+    "id": "DJSON001",
     "severity": "Warning",
     "line": 19,
-    "column": 55,
+    "column": 58,
     "path": "Class1.csx",
     "message-args": [ "TypeName" ]
   }

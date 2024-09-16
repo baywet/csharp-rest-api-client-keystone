@@ -31,10 +31,10 @@ namespace CSharpRestApiClientKeystone.Analyzers
         {
             if (context.Node is not InvocationExpressionSyntax invocationExpr) return;
             if (invocationExpr.Expression is not MemberAccessExpressionSyntax memberAccessExpr) return;
-            if (!memberAccessExpr.Name.Identifier.Text.Equals("Deserialize", StringComparison.Ordinal)) return;
+            if (!memberAccessExpr.Name.Identifier.Text.Equals("DeserializeObject", StringComparison.Ordinal)) return;
             if (context.SemanticModel.GetSymbolInfo(memberAccessExpr).Symbol is not IMethodSymbol methodSymbol ||
                 methodSymbol.ReceiverType is not INamedTypeSymbol receiverTypeSymbol ||
-                !receiverTypeSymbol.IsExpectedType("JsonSerializer", "System.Text.Json")) return;
+                !receiverTypeSymbol.IsExpectedType("JsonConvert", "Newtonsoft.Json")) return;
             if (invocationExpr.ArgumentList.Arguments is not {Count:> 0} argumentList) return;
             var firstArgument = argumentList[0].Expression;
             if (firstArgument is IdentifierNameSyntax && 
