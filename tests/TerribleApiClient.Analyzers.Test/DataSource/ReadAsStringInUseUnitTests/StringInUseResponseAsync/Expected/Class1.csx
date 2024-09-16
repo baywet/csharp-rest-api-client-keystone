@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using System.Text.Json;
-using System.IO;
-using System.Net.Http;
+﻿using System.Threading.Tasks;
 
 namespace ConsoleApplication1
 {
@@ -14,7 +7,7 @@ namespace ConsoleApplication1
         public async Task<object> DeserializeAsClassWithStringAndReflectionAsync()
         {
             using var responseMessage = new HttpResponseMessage();
-            string strRepresentation = await responseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
+            using var strRepresentation = await responseMessage.Content.ReadAsStreamAsync().ConfigureAwait(false);
             return JsonSerializer.Deserialize<object>(strRepresentation);
             // the stream reader and strRepresentation lines remain but other analyzers will catch unused variables
         }

@@ -1,10 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeFixes;
+﻿using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System;
 using TestHelper;
 using Xunit;
-using TerribleApiClient.Analyzers;
 using System.Threading.Tasks;
 
 namespace TerribleApiClient.Analyzers.Test
@@ -16,8 +13,6 @@ namespace TerribleApiClient.Analyzers.Test
 
         [Fact]
         public Task StringInUseAsync() => VerifyCSharpByConventionAsync();
-        [Fact]
-        public Task StringInUseResponseAsync() => VerifyCSharpByConventionAsync();
         [Fact]
         public Task StringInUseNoVariableAsync() => VerifyCSharpByConventionAsync();
 
