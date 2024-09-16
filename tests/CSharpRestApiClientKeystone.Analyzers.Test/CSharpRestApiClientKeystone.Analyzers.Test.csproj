@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.11.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="System.Text.Json" Version="8.0.4" />
     <PackageReference Include="xunit" Version="2.9.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\TerribleApiClient.Analyzers\TerribleApiClient.Analyzers.csproj" />
+    <ProjectReference Include="..\..\src\CSharpRestApiClientKeystone.Analyzers\CSharpRestApiClientKeystone.Analyzers.csproj" />
   </ItemGroup>
 
 </Project>

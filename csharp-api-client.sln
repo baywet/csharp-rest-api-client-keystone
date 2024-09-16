@@ -7,11 +7,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{61E897A0-FAB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "src\Benchmarks\Benchmarks.csproj", "{4204C84D-38D9-4E8B-BFA9-A1EF1A6A5610}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TerribleApiClient.Analyzers", "src\TerribleApiClient.Analyzers\TerribleApiClient.Analyzers.csproj", "{AA9550D9-2775-45C1-8187-772445D0C542}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpRestApiClientKeystone.Analyzers", "src\CSharpRestApiClientKeystone.Analyzers\CSharpRestApiClientKeystone.Analyzers.csproj", "{AA9550D9-2775-45C1-8187-772445D0C542}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0025E22B-67D6-4949-926C-EEAD0AB18519}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TerribleApiClient.Analyzers.Test", "tests\TerribleApiClient.Analyzers.Test\TerribleApiClient.Analyzers.Test.csproj", "{DB5E33DC-029D-4B47-B7CC-B495487A6020}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpRestApiClientKeystone.Analyzers.Test", "tests\CSharpRestApiClientKeystone.Analyzers.Test\CSharpRestApiClientKeystone.Analyzers.Test.csproj", "{DB5E33DC-029D-4B47-B7CC-B495487A6020}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -7,7 +7,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <PackageId>TerribleApiClient.Analyzers</PackageId>
+    <PackageId>CSharpRestApiClientKeystone.Analyzers</PackageId>
     <PackageVersion>1.0.0.0</PackageVersion>
     <Authors>AUTHOR_NAME</Authors>
     <PackageLicenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</PackageLicenseUrl>
@@ -15,10 +15,10 @@
     <PackageIconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</PackageIconUrl>
     <RepositoryUrl>http://REPOSITORY_URL_HERE_OR_DELETE_THIS_LINE</RepositoryUrl>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Description>TerribleApiClient.Analyzers</Description>
+    <Description>CSharpRestApiClientKeystone.Analyzers</Description>
     <PackageReleaseNotes>Summary of changes made in this release of the package.</PackageReleaseNotes>
     <Copyright>Copyright</Copyright>
-    <PackageTags>TerribleApiClient.Analyzers, analyzers</PackageTags>
+    <PackageTags>CSharpRestApiClientKeystone.Analyzers, analyzers</PackageTags>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>

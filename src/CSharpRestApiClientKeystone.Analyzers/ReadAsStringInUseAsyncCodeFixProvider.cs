@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis.Text;
 using System;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace TerribleApiClient.Analyzers
+namespace CSharpRestApiClientKeystone.Analyzers
 {
     public class SyntaxRewriter : CSharpSyntaxRewriter
     {

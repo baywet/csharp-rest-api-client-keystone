@@ -2,7 +2,7 @@ using System;
 
 using Microsoft.CodeAnalysis;
 
-namespace TerribleApiClient.Analyzers;
+namespace CSharpRestApiClientKeystone.Analyzers;
 
 public static class ISymbolExtensions
 {
