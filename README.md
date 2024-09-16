@@ -47,7 +47,7 @@ dotnet test
 > NOTE: at the moment the library is NOT published as a nuget package, you'll need a direct reference to the project
 
 ```shell
-gh repo clone baywet/csharp-rest-api-client-keystone`
+gh repo clone baywet/csharp-rest-api-client-keystone
 # in the target project
 dotnet add <pathToTargetProject> reference $PWD/src/CSharpRestApiClientKeystone.Analyzers/CSharpRestApiClientKeystone.Analyzers.csproj
 dotnet build
