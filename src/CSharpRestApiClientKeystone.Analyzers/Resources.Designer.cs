@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TerribleApiClient.Analyzers
+namespace CSharpRestApiClientKeystone.Analyzers
 {
     using System;
     using System.Reflection;
@@ -46,7 +46,7 @@ namespace TerribleApiClient.Analyzers
             {
                 if (object.ReferenceEquals(resourceMan, null))
                 {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TerribleApiClient.Analyzers.Resources", typeof(Resources).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CSharpRestApiClientKeystone.Analyzers.Resources", typeof(Resources).GetTypeInfo().Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

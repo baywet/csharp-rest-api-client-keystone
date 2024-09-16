@@ -14,7 +14,7 @@ using Microsoft.CodeAnalysis.Rename;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.CodeAnalysis.Editing;
 
-namespace TerribleApiClient.Analyzers
+namespace CSharpRestApiClientKeystone.Analyzers
 {
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(JsonStringDeserializationCodeFixProvider)), Shared]
     public class JsonStringDeserializationCodeFixProvider : CodeFixProvider

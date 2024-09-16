@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TerribleApiClient.Analyzers\TerribleApiClient.Analyzers.csproj">
+    <ProjectReference Include="..\CSharpRestApiClientKeystone.Analyzers\CSharpRestApiClientKeystone.Analyzers.csproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <OutputItemType>Analyzer</OutputItemType>
     </ProjectReference>

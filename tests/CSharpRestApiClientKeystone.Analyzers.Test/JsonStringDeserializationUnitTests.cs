@@ -4,10 +4,10 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using TestHelper;
 using Xunit;
-using TerribleApiClient.Analyzers;
+using CSharpRestApiClientKeystone.Analyzers;
 using System.Threading.Tasks;
 
-namespace TerribleApiClient.Analyzers.Test
+namespace CSharpRestApiClientKeystone.Analyzers.Test
 {
     public class JsonStringDeserializationUnitTests : ConventionCodeFixVerifier
     {
