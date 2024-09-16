@@ -19,7 +19,7 @@ namespace CSharpRestApiClientKeystone.Analyzers
     [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(NewtonsoftDeserializationCodeFixProvider)), Shared]
     public class NewtonsoftDeserializationCodeFixProvider : CodeFixProvider
     {
-        private const string Title = "Replace string value with Stream";
+        private const string Title = "Replace Newtonsoft.Json.JsonConvert with System.Text.Json.JsonSerializer";
 
         public sealed override ImmutableArray<string> FixableDiagnosticIds
         {
