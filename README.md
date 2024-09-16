@@ -21,14 +21,14 @@ Where analyzers cannot be recommended (no existing work), the plan is to start b
 
 ### Running the benchmarks or contributing to the analyzers
 
-Required tools:
+#### Required tools
 
 - .NET SDK 8 `winget install Microsoft.DotNet.SDK.8`.
 - Visual Studio Code `winget install Microsoft.VisualStudioCode` or Visual Studio 2022 `Microsoft.VisualStudio.2022.Community`.
 - Git `winget install Git.Git`.
 - GitHub CLI `winget install GitHub.CLI`.
 
-Running the benchmarks:
+#### Running the benchmarks
 
 ```shell
 gh repo clone baywet/csharp-rest-api-client-keystone
@@ -36,7 +36,7 @@ cd csharp-rest-api-client-keystone
 dotnet run --project src\Benchmarks\Benchmarks.csproj
 ```
 
-Running unit tests
+#### Running unit tests
 
 ```shell
 dotnet test
