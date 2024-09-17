@@ -33,7 +33,6 @@ namespace CSharpRestApiClientKeystone.Analyzers
             if (context.Node is not InvocationExpressionSyntax invocationExpr) return;
             if (invocationExpr.Expression is not MemberAccessExpressionSyntax memberAccessExpr) return;
             if (!memberAccessExpr.Name.Identifier.Text.Equals("ReadAsStringAsync", StringComparison.Ordinal)) return;
-            var diag = context.Compilation.GetDiagnostics();
             var symbolInfo = context.SemanticModel.GetSymbolInfo(memberAccessExpr);
             if (symbolInfo.Symbol is not IMethodSymbol methodSymbol ||
             methodSymbol.ReceiverType is not INamedTypeSymbol receiverTypeSymbol ||
