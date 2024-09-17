@@ -212,6 +212,7 @@ namespace TestHelper
             MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(JsonSerializer).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.JsonConvert).Assembly.Location)
         ];
 
         protected virtual CSharpCompilationOptions CompilationOptions => new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
