@@ -8,6 +8,12 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace CSharpRestApiClientKeystone.Analyzers
 {
+    public class ReadAsStringConstant {
+        public const string MethodName = "ReadAsStringAsync";
+        public const string ExpectedType = "HttpContent";
+        public const string ExpectedNamespace = "System.Net.Http";
+    }
+
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class ReadAsStringInUseAsyncAnalyzer : DiagnosticAnalyzer
     {
@@ -32,11 +38,11 @@ namespace CSharpRestApiClientKeystone.Analyzers
         {
             if (context.Node is not InvocationExpressionSyntax invocationExpr) return;
             if (invocationExpr.Expression is not MemberAccessExpressionSyntax memberAccessExpr) return;
-            if (!memberAccessExpr.Name.Identifier.Text.Equals("ReadAsStringAsync", StringComparison.Ordinal)) return;
+            if (!memberAccessExpr.Name.Identifier.Text.Equals(ReadAsStringConstant.MethodName, StringComparison.Ordinal)) return;
             var symbolInfo = context.SemanticModel.GetSymbolInfo(memberAccessExpr);
             if (symbolInfo.Symbol is not IMethodSymbol methodSymbol ||
             methodSymbol.ReceiverType is not INamedTypeSymbol receiverTypeSymbol ||
-            !receiverTypeSymbol.IsExpectedType("HttpContent", "System.Net.Http")) return;
+            !receiverTypeSymbol.IsExpectedType(ReadAsStringConstant.ExpectedType, ReadAsStringConstant.ExpectedNamespace)) return;
             Diagnostic diagnostic = Diagnostic.Create(Rule, memberAccessExpr.GetLocation());
             context.ReportDiagnostic(diagnostic);
         }

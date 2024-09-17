@@ -61,7 +61,7 @@ namespace CSharpRestApiClientKeystone.Analyzers
 
             MemberAccessExpressionSyntax memberExpression = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf()
                 .OfType<MemberAccessExpressionSyntax>()
-                .First(x => x.Name.Identifier.Text.Equals("ReadAsStringAsync", StringComparison.Ordinal));
+                .First(x => x.Name.Identifier.Text.Equals(ReadAsStringConstant.MethodName, StringComparison.Ordinal));
 
             context.RegisterCodeFix(
                 CodeAction.Create(
