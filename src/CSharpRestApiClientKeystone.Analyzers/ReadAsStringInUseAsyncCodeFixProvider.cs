@@ -19,7 +19,7 @@ namespace CSharpRestApiClientKeystone.Analyzers
         {
             // Check if the variable is of type string
             TypeSyntax variableType = node.Declaration.Type;
-            if (variableType is PredefinedTypeSyntax predefinedType && "string".Equals(predefinedType.Keyword.Text, StringComparer.Ordinal))
+            if (variableType is PredefinedTypeSyntax predefinedType && StringComparer.Ordinal.Equals("string", predefinedType.Keyword.Text))
             {
                 // Create a new variable declaration with 'var'
                 VariableDeclarationSyntax newDeclaration = node.Declaration.WithType(SyntaxFactory.IdentifierName("var"));
