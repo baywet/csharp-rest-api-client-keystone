@@ -63,7 +63,6 @@ namespace CSharpRestApiClientKeystone.Analyzers
                 .OfType<MemberAccessExpressionSyntax>()
                 .First(x => x.Name.Identifier.Text.Equals("ReadAsStringAsync", StringComparison.Ordinal));
 
-            //if (await FindStringVariableAsync(context.Document, memberExpression, context.CancellationToken) is VariableDeclaratorSyntax stringVariable)
             context.RegisterCodeFix(
                 CodeAction.Create(
                     title: Title,
