@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.Diagnostics;
 using TestHelper;
 using Xunit;
-using CSharpRestApiClientKeystone.Analyzers;
 using System.Threading.Tasks;
 
 namespace CSharpRestApiClientKeystone.Analyzers.Test
@@ -14,6 +13,7 @@ namespace CSharpRestApiClientKeystone.Analyzers.Test
 
         [Fact]
         public Task StringInUseAsync() => VerifyCSharpByConventionAsync();
+
         [Fact]
         public Task StringInUseNoVariableAsync() => VerifyCSharpByConventionAsync();
 

@@ -32,12 +32,6 @@ namespace CSharpRestApiClientKeystone.Analyzers
         {
             if (context.Node is not InvocationExpressionSyntax invocationExpr) return;
             if (invocationExpr.Expression is not MemberAccessExpressionSyntax memberAccessExpr) return;
-            if (memberAccessExpr.Name.Identifier.Text.Equals("ConfigureAwait"))
-            {
-                if (memberAccessExpr.Expression is not InvocationExpressionSyntax parentInvocationExpr) return;
-                if (parentInvocationExpr.Expression is not MemberAccessExpressionSyntax parentMemberAccessExpr) return;
-                memberAccessExpr = parentMemberAccessExpr;
-            }
             if (!memberAccessExpr.Name.Identifier.Text.Equals("ReadAsStringAsync", StringComparison.Ordinal)) return;
             Diagnostic diagnostic = Diagnostic.Create(Rule, memberAccessExpr.GetLocation());
             context.ReportDiagnostic(diagnostic);
