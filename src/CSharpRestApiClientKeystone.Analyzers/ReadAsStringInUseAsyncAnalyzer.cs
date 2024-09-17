@@ -27,12 +27,13 @@ namespace CSharpRestApiClientKeystone.Analyzers
             context.EnableConcurrentExecution();
             context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.InvocationExpression);
         }
+        internal const string MethodName = "ReadAsStringAsync";
 
         private static void AnalyzeNode(SyntaxNodeAnalysisContext context)
         {
             if (context.Node is not InvocationExpressionSyntax invocationExpr) return;
             if (invocationExpr.Expression is not MemberAccessExpressionSyntax memberAccessExpr) return;
-            if (!memberAccessExpr.Name.Identifier.Text.Equals("ReadAsStringAsync", StringComparison.Ordinal)) return;
+            if (!memberAccessExpr.Name.Identifier.Text.Equals(MethodName, StringComparison.Ordinal)) return;
             var symbolInfo = context.SemanticModel.GetSymbolInfo(memberAccessExpr);
             if (symbolInfo.Symbol is not IMethodSymbol methodSymbol ||
             methodSymbol.ReceiverType is not INamedTypeSymbol receiverTypeSymbol ||
