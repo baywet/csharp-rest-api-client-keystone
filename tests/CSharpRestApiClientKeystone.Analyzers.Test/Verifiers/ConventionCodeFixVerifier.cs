@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace TestHelper
 {
@@ -205,6 +206,8 @@ namespace TestHelper
             return diagnostics.OrderBy(d => d.Location.SourceSpan.Start).ToArray();
         }
 
+        private static readonly DirectoryInfo _coreDir = Directory.GetParent(System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory());
+
         protected static readonly IEnumerable<MetadataReference> References =
         [
             MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
@@ -212,7 +215,10 @@ namespace TestHelper
             MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(JsonSerializer).Assembly.Location),
-            MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.JsonConvert).Assembly.Location)
+            MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.JsonConvert).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(System.Net.Http.HttpContent).Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(Object).GetTypeInfo().Assembly.Location),
+            MetadataReference.CreateFromFile(_coreDir.FullName + Path.DirectorySeparatorChar + "System.Runtime.dll")
         ];
 
         protected virtual CSharpCompilationOptions CompilationOptions => new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
