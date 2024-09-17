@@ -3,9 +3,8 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using TestHelper;
 using Xunit;
 using System.Threading.Tasks;
-using CSharpRestApiClientKeystone.Analyzers;
 
-namespace TerribleApiClient.Analyzers.Test
+namespace CSharpRestApiClientKeystone.Analyzers.Test
 {
     public class ReadAsStringInUseUnitTests : ConventionCodeFixVerifier
     {
