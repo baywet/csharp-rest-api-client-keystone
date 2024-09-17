@@ -73,8 +73,8 @@ namespace CSharpRestApiClientKeystone.Analyzers
 
         private async Task<Document> ApplyCodeFix(Document document, MemberAccessExpressionSyntax memberExpression, CancellationToken cancellationToken)
         {
-            Document newDocument = await ReplaceStringIdentifierWithStreamAsync(document, memberExpression, cancellationToken);
-            newDocument = await ReplaceStringToUsingVarStatement(newDocument, memberExpression, cancellationToken);
+            Document newDocument = await ReplaceStringIdentifierWithStreamAsync(document, memberExpression, cancellationToken).ConfigureAwait(false);
+            newDocument = await ReplaceStringToUsingVarStatement(newDocument, memberExpression, cancellationToken).ConfigureAwait(false);
             return newDocument;
         }
 
