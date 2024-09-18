@@ -117,6 +117,18 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+    <data name="AnalyzerDescription003" xml:space="preserve">
+    <value>Using CopyTo on a MemoryStream larger than hundreds of Kbs several times is not efficient, if the copy is used several times, try to use RecyclableMemoryStream since it have a better manager to create/reuse/dispose MemoryStreams</value>
+    <comment>The description for the analyzer.</comment>
+  </data>
+    <data name="AnalyzerMessageFormat003" xml:space="preserve">
+    <value>Avoid using CopyTo to a new MemoryStream, instead, use the RecyclableMemoryStream manager to get a new MemoryStream</value>
+    <comment>The format-able message the diagnostic displays.</comment>
+  </data>
+    <data name="AnalyzerTitle003" xml:space="preserve">
+    <value>RecyclableMemoryStream is more efficient for CopyTo MemoryStream</value>
+    <comment>The title of the diagnostic.</comment>
+  </data>
   <data name="AnalyzerDescription002" xml:space="preserve">
     <value>Using intermediate strings during deserialization leads to poor performance and streams should be used instead.</value>
     <comment>The description for the analyzer.</comment>

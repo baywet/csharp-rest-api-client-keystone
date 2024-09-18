@@ -1,0 +1,10 @@
+﻿[
+  {
+    "id": "DJSON003",
+    "severity": "Info",
+    "line": 15,
+    "column": 15,
+    "path": "Class1.csx",
+    "message-args": [ "TypeName" ]
+  }
+]
