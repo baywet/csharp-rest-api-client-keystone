@@ -1,25 +1,29 @@
-﻿using System.Text;
-
-using BenchmarkDotNet.Attributes;
-
-using Benchmarks.Mocks;
-
+﻿using BenchmarkDotNet.Attributes;
 using Microsoft.IO;
 
 namespace Benchmarks.Deserialization;
 [ShortRunJob]
 [MemoryDiagnoser]
 #pragma warning disable CA1001 // Types that own disposable fields should be disposable
-public class MemoryStreamCopyBenchmark
+public class MemoryStreamCopyImageBenchmark
 #pragma warning restore CA1001 // Types that own disposable fields should be disposable
 {
     private MemoryStream? _memoryStream;
     private CancellationTokenSource? _cancellationTokenSource;
-    private static RecyclableMemoryStreamManager manager = new RecyclableMemoryStreamManager();
+    private static readonly RecyclableMemoryStreamManager.Options options = new RecyclableMemoryStreamManager.Options
+    {
+        BlockSize = 1024,
+    };
+    private static readonly RecyclableMemoryStreamManager manager = new RecyclableMemoryStreamManager(options);
     [GlobalSetup]
     public void Setup()
     {
-        _memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(FunTranslationClient.ReturnJson));
+        var baseDirectory = System.IO.Directory.GetCurrentDirectory();
+        using (var source = File.Open($"{baseDirectory}\\MemoryStreamCopy\\bear.jpg", FileMode.Open))
+        {
+            _memoryStream = new MemoryStream();
+            source.CopyTo(_memoryStream);
+        }
         _cancellationTokenSource = new();
     }
     
@@ -49,9 +53,9 @@ public class MemoryStreamCopyBenchmark
 
     [Benchmark]
     public async Task HundredMemoryCopyAsync()
-    {
-        IterationSetup();        
+    {         
         for (var i = 0; i < 100; i++) {
+            IterationSetup();
             using (var memoryStream = new MemoryStream())
             {
                 await _memoryStream!.CopyToAsync(memoryStream).ConfigureAwait(false);
@@ -60,13 +64,12 @@ public class MemoryStreamCopyBenchmark
         return;
     }
 
-
     [Benchmark]
     public async Task HundredRecycableMemoryCopyAsync()
-    {
-        IterationSetup();        
+    {        
         for (var i = 0; i < 100; i++)
         {
+            IterationSetup();
             using (var memoryStream = manager.GetStream())
             {
                 await _memoryStream!.CopyToAsync(memoryStream).ConfigureAwait(false);
@@ -76,11 +79,11 @@ public class MemoryStreamCopyBenchmark
     }
 
     [Benchmark]
-    public async Task MillionMemoryCopyAsync()
-    {
-        IterationSetup();        
-        for (var i = 0; i < 1000000; i++)
+    public async Task ThousandMemoryCopyAsync()
+    {              
+        for (var i = 0; i < 1000; i++)
         {
+            IterationSetup();
             using (var memoryStream = new MemoryStream())
             {
                 await _memoryStream!.CopyToAsync(memoryStream).ConfigureAwait(false);
@@ -89,13 +92,12 @@ public class MemoryStreamCopyBenchmark
         return;
     }
 
-
     [Benchmark]
-    public async Task MillionRecycableMemoryCopyAsync()
-    {
-        IterationSetup();
-        for (var i = 0; i < 1000000; i++)
+    public async Task ThousandRecycableMemoryCopyAsync()
+    {        
+        for (var i = 0; i < 1000; i++)
         {
+            IterationSetup();
             using (var memoryStream = manager.GetStream()) { 
                 await _memoryStream!.CopyToAsync(memoryStream).ConfigureAwait(false);
             }
@@ -105,11 +107,11 @@ public class MemoryStreamCopyBenchmark
 
     [Benchmark]
     public async Task<List<MemoryStream>> HundredMemoryListCopyAsync()
-    {
-        IterationSetup();
+    {        
         var memoryStreamList = new List<MemoryStream>();
         for (var i = 0; i < 100; i++)
         {
+            IterationSetup();
             using (var memoryStream = new MemoryStream())
             {
                 await _memoryStream!.CopyToAsync(memoryStream).ConfigureAwait(false);
@@ -121,11 +123,11 @@ public class MemoryStreamCopyBenchmark
 
     [Benchmark]
     public async Task<List<MemoryStream>> HundredRecycableMemoryListCopyAsync()
-    {
-        IterationSetup();
+    {        
         var memoryStreamList = new List<MemoryStream>();
         for (var i = 0; i < 100; i++)
         {
+            IterationSetup();
             using (var memoryStream = manager.GetStream())
             {
                 await _memoryStream!.CopyToAsync(memoryStream).ConfigureAwait(false);
@@ -136,12 +138,12 @@ public class MemoryStreamCopyBenchmark
     }
 
     [Benchmark]
-    public async Task<List<MemoryStream>> MillionMemoryListCopyAsync()
-    {
-        IterationSetup();
+    public async Task<List<MemoryStream>> ThousandMemoryListCopyAsync()
+    {        
         var memoryStreamList = new List<MemoryStream>();
-        for (var i = 0; i < 1000000; i++)
+        for (var i = 0; i < 1000; i++)
         {
+            IterationSetup();
             using (var memoryStream = new MemoryStream())
             {
                 await _memoryStream!.CopyToAsync(memoryStream).ConfigureAwait(false);
@@ -152,12 +154,12 @@ public class MemoryStreamCopyBenchmark
     }  
 
     [Benchmark]
-    public async Task<List<MemoryStream>> MillionRecycableMemoryListCopyAsync()
-    {
-        IterationSetup();
+    public async Task<List<MemoryStream>> ThousandRecycableMemoryListCopyAsync()
+    {        
         var memoryStreamList = new List<MemoryStream>();
-        for (var i = 0; i < 1000000; i++)
+        for (var i = 0; i < 1000; i++)
         {
+            IterationSetup();
             using (var memoryStream = manager.GetStream())
             {
                 await _memoryStream!.CopyToAsync(memoryStream).ConfigureAwait(false);
