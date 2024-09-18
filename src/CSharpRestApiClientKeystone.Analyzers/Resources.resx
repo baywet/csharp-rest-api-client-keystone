@@ -141,4 +141,13 @@
     <value>Newtonsoft used for JSON deserialization</value>
     <comment>The title of the diagnostic.</comment>
   </data>
+  <data name="AnalyzerDescription004" xml:space="preserve">
+    <value>Use HttpClientFactory to create and reuse HttpClient</value>
+  </data>
+  <data name="AnalyzerMessageFormat004" xml:space="preserve">
+    <value>Avoid creating new instances of HttpClient for making Http calls to services.</value>
+  </data>
+  <data name="AnalyzerTitle004" xml:space="preserve">
+    <value>HttpClientFactory used for HttpClient creation</value>
+  </data>
 </root>
