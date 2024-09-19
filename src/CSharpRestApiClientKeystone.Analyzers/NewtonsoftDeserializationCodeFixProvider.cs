@@ -38,7 +38,7 @@ namespace CSharpRestApiClientKeystone.Analyzers
             var diagnostic = context.Diagnostics[0];
             var diagnosticSpan = diagnostic.Location.SourceSpan;
 
-            var invocationExpression = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<InvocationExpressionSyntax>().First();
+            if (root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<InvocationExpressionSyntax>().FirstOrDefault() is not {} invocationExpression) return;
 
             context.RegisterCodeFix(
                 CodeAction.Create(

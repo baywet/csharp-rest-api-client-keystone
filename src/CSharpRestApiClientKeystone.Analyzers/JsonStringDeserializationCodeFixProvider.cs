@@ -38,9 +38,8 @@ namespace CSharpRestApiClientKeystone.Analyzers
             var diagnostic = context.Diagnostics[0];
             var diagnosticSpan = diagnostic.Location.SourceSpan;
 
-            var literalExpression = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<IdentifierNameSyntax>().First();
-
-            if (await FindStreamVariableAsync(context.Document, literalExpression, context.CancellationToken) is VariableDeclaratorSyntax streamVariable)
+            if (root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<IdentifierNameSyntax>().FirstOrDefault() is IdentifierNameSyntax literalExpression &&
+                await FindStreamVariableAsync(context.Document, literalExpression, context.CancellationToken) is VariableDeclaratorSyntax streamVariable)
                 context.RegisterCodeFix(
                     CodeAction.Create(
                         title: Title,
@@ -51,7 +50,7 @@ namespace CSharpRestApiClientKeystone.Analyzers
         private async Task<VariableDeclaratorSyntax?> FindStreamVariableAsync(Document document, IdentifierNameSyntax identifierSyntax, CancellationToken cancellationToken)
         {
             var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-            var methodDeclaration = identifierSyntax.Ancestors().OfType<MethodDeclarationSyntax>().First();
+            if (identifierSyntax.Ancestors().OfType<MethodDeclarationSyntax>().FirstOrDefault() is not {} methodDeclaration) return null;
             var streamVariable = methodDeclaration.DescendantNodes()
                 .OfType<VariableDeclaratorSyntax>()
                 .Where(v => v.Initializer != null)
