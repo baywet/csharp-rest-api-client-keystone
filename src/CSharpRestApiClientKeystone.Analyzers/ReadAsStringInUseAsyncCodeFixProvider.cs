@@ -59,16 +59,18 @@ namespace CSharpRestApiClientKeystone.Analyzers
             Diagnostic diagnostic = context.Diagnostics[0];
             TextSpan diagnosticSpan = diagnostic.Location.SourceSpan;
 
-            MemberAccessExpressionSyntax memberExpression = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf()
+            if (root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf()
                 .OfType<MemberAccessExpressionSyntax>()
-                .First(x => x.Name.Identifier.Text.Equals(ReadAsStringConstant.MethodName, StringComparison.Ordinal));
+                .FirstOrDefault(x => x.Name.Identifier.Text.Equals(ReadAsStringConstant.MethodName, StringComparison.Ordinal)) is MemberAccessExpressionSyntax memberExpression)
+            {
 
-            context.RegisterCodeFix(
-                CodeAction.Create(
-                    title: Title,
-                    createChangedDocument: c => ApplyCodeFix(context.Document, memberExpression, c),
-                    equivalenceKey: Title),
-                diagnostic);
+                context.RegisterCodeFix(
+                    CodeAction.Create(
+                        title: Title,
+                        createChangedDocument: c => ApplyCodeFix(context.Document, memberExpression, c),
+                        equivalenceKey: Title),
+                    diagnostic);
+            }
         }
 
         private async Task<Document> ApplyCodeFix(Document document, MemberAccessExpressionSyntax memberExpression, CancellationToken cancellationToken)
