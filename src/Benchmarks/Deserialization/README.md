@@ -5,6 +5,7 @@
 - MUST NOT use intermediate strings during deserialization.
 - MUST NOT use newtonsoft JSON, favor System.Text.Json.
 - SHOULD provide type info.
+- MUST use a static reference to JsonSerializerOptions.
 
 ## Results
 
@@ -26,6 +27,10 @@ Using intermediate strings to deserialize results in unnecessary allocations, wh
 Passing type info does not appear to significantly improve deserialization, it however enables trimming through removing the use of reflection. Which itself results in smaller overall storage/memory footprint, shorter startup times, reduced memory consumption, etc...
 
 ## Rules
+
+Pre-existing work:
+
+- [CA1869](https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1869)
 
 No pre-existing work, will require implementation:
 
