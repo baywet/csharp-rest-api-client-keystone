@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Reflection;
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
@@ -35,8 +36,9 @@ public class FixFileCommandHandler : ICommandHandler
             return 1;
         }
 
-        var loadedAnalyzers = await LoadNugetPackagesAsync(nugetPackages, cancellationToken);
+        var (loadedAnalyzers, loadedFixProviders) = await LoadNugetPackagesAsync(nugetPackages, cancellationToken);
         var analyzersToApply = loadedAnalyzers.Where(x => deffectsToFix.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
+        var fixProvidersToApply = loadedFixProviders.Where(x => deffectsToFix.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
 
         var originalSources = new Dictionary<string, string>(filePaths.Count);
         foreach (var file in filePaths)
@@ -48,9 +50,10 @@ public class FixFileCommandHandler : ICommandHandler
     }
     private static readonly HttpClient HttpClient = new();
 
-    private async Task<Dictionary<string, DiagnosticAnalyzer>> LoadNugetPackagesAsync(List<string> nugetPackages, CancellationToken cancellationToken)
+    private static async Task<(Dictionary<string, DiagnosticAnalyzer>, Dictionary<string, CodeFixProvider>)> LoadNugetPackagesAsync(List<string> nugetPackages, CancellationToken cancellationToken)
     {
-        var result = new Dictionary<string, DiagnosticAnalyzer>();
+        var resultAnalyzers = new Dictionary<string, DiagnosticAnalyzer>(StringComparer.OrdinalIgnoreCase);
+        var resultFixProviders = new Dictionary<string, CodeFixProvider>(StringComparer.OrdinalIgnoreCase);
         Directory.CreateDirectory("packages");
         foreach (var package in nugetPackages)
         {
@@ -70,13 +73,22 @@ public class FixFileCommandHandler : ICommandHandler
                     var analyzer = (DiagnosticAnalyzer)Activator.CreateInstance(analyzerClass);
                     foreach (var diagnostic in analyzer.SupportedDiagnostics)
                     {
-                        result.TryAdd(diagnostic.Id, analyzer);
+                        resultAnalyzers.TryAdd(diagnostic.Id, analyzer);
+                    }
+                }
+                var fixProviders = assembly.GetTypes().Where(t => typeof(CodeFixProvider).IsAssignableFrom(t) && !t.IsAbstract).ToArray();
+                foreach (var fixProviderClass in fixProviders)
+                {
+                    var fixProvider = (CodeFixProvider)Activator.CreateInstance(fixProviderClass);
+                    foreach (var diagnostic in fixProvider.FixableDiagnosticIds)
+                    {
+                        resultFixProviders.TryAdd(diagnostic, fixProvider);
                     }
                 }
 
             }
         }
-        return result;
+        return (resultAnalyzers, resultFixProviders);
     }
 
     // private async Task FixCSharpAsync(Dictionary<string, string> sources, DiagnosticResult[] expectedResults, params FixResult[] fixResults)
