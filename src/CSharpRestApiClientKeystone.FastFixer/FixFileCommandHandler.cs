@@ -5,9 +5,12 @@ using System.IO.Compression;
 using System.Reflection;
 
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Formatting;
+using Microsoft.CodeAnalysis.Simplification;
 using Microsoft.CodeAnalysis.Text;
 
 namespace CSharpRestApiClientKeystone.FastFixer;
@@ -46,7 +49,11 @@ public class FixFileCommandHandler : ICommandHandler
             originalSources.Add(file, await File.ReadAllTextAsync(file, cancellationToken));
         }
 
-        throw new NotImplementedException();
+        foreach(var analyzerToApply in analyzersToApply)
+        {
+            await FixCSharpAsync(originalSources, analyzerToApply.Value, fixProvidersToApply[analyzerToApply.Key], cancellationToken);
+        }
+        return 0;
     }
     private static readonly HttpClient HttpClient = new();
 
@@ -91,41 +98,72 @@ public class FixFileCommandHandler : ICommandHandler
         return (resultAnalyzers, resultFixProviders);
     }
 
-    // private async Task FixCSharpAsync(Dictionary<string, string> sources, DiagnosticResult[] expectedResults, params FixResult[] fixResults)
-    // {
-    //     var analyzer = new VSTHRD111UseConfigureAwaitAnalyzer();
-    //     var fix = GetCSharpCodeFixProvider();
+    private async Task FixCSharpAsync(Dictionary<string, string> sources, DiagnosticAnalyzer analyzer, CodeFixProvider fix, CancellationToken cancellationToken)
+    {
+        var originalProject = CreateProject(sources);
 
-    //     var originalProject = CreateProject(sources);
+        // var diagnostics = GetDiagnostics(originalProject, analyzer);
 
-    //     var diagnostics = GetDiagnostics(originalProject, analyzer);
+        var project = await ApplyFixAsync(originalProject, analyzer, fix, cancellationToken).ConfigureAwait(false);
+        var actualSources = new Dictionary<string, string>();
 
-    //     foreach (var fixResult in fixResults)
-    //     {
-    //         var project = await ApplyFixAsync(originalProject, analyzer, fix, fixResult.Index);
-
-    //         var expectedSources = fixResult.ExpectedSources;
-
-    //         if (expectedSources == null || expectedSources.Count == 0)
-    //             return;
-
-    //         var actualSources = new Dictionary<string, string>();
-
-    //         foreach (var doc in project.Documents)
-    //         {
-    //             var code = GetStringFromDocument(doc);
-    //             actualSources.Add(doc.Name, code);
-    //         }
-
-    //         foreach (var item in actualSources)
-    //         {
-    //             var actual = item.Value;
-    //             var newSource = expectedSources[item.Key];
-    //             Assert.Equal(newSource, actual);
-    //         }
-    //     }
-    // }
+        foreach (var doc in project.Documents)
+        {
+            var code = await GetStringFromDocumentAsync(doc, cancellationToken).ConfigureAwait(false);
+            actualSources.Add(doc.Name, code);
+            //TODO write to file if changed
+        }
+    }
     #region ImportedFromUnitTests
+    private static async Task<string> GetStringFromDocumentAsync(Document document, CancellationToken cancellationToken)
+    {
+        var simplifiedDoc = await Simplifier.ReduceAsync(document, Simplifier.Annotation, cancellationToken: cancellationToken).ConfigureAwait(false);
+        var root = await simplifiedDoc.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+        root = Formatter.Format(root, Formatter.Annotation, simplifiedDoc.Project.Solution.Workspace, cancellationToken: cancellationToken);
+        return root.GetText().ToString();
+    }
+    private static async Task<Project> ApplyFixAsync(Project project, DiagnosticAnalyzer analyzer, CodeFixProvider fix, CancellationToken cancellationToken)
+    {
+        var diagnostics = GetDiagnostics(project, analyzer);
+        var fixableDiagnostics = diagnostics.Where(d => fix.FixableDiagnosticIds.Contains(d.Id)).ToArray();
+
+        var attempts = fixableDiagnostics.Length;
+
+        for (int i = 0; i < attempts; i++)
+        {
+            var diag = fixableDiagnostics.First();
+            var doc = project.Documents.FirstOrDefault(d => d.Name == diag.Location.SourceTree.FilePath);
+
+            if (doc == null)
+            {
+                fixableDiagnostics = fixableDiagnostics.Skip(1).ToArray();
+                continue;
+            }
+
+            var actions = new List<CodeAction>();
+            var fixContext = new CodeFixContext(doc, diag, (a, d) => actions.Add(a), CancellationToken.None);
+            await fix.RegisterCodeFixesAsync(fixContext).ConfigureAwait(false);
+
+            if (actions.Count == 0)
+            {
+                break;
+            }
+
+            foreach (var codeAction in actions)
+            {
+                var operations = await codeAction.GetOperationsAsync(cancellationToken).ConfigureAwait(false);
+                var solution = operations.OfType<ApplyChangesOperation>().Single().ChangedSolution;
+                project = solution.GetProject(project.Id);
+
+                fixableDiagnostics = GetDiagnostics(project, analyzer)
+                    .Where(d => fix.FixableDiagnosticIds.Contains(d.Id)).ToArray();
+
+                if (fixableDiagnostics.Length == 0) break;
+            }
+        }
+
+        return project;
+    }
     protected static CSharpCompilationOptions CompilationOptions => new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
     private static readonly DirectoryInfo _coreDir = Directory.GetParent(System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory());
     protected static readonly IEnumerable<MetadataReference> References =
