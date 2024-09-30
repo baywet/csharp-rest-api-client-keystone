@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0025E22B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpRestApiClientKeystone.Analyzers.Test", "tests\CSharpRestApiClientKeystone.Analyzers.Test\CSharpRestApiClientKeystone.Analyzers.Test.csproj", "{DB5E33DC-029D-4B47-B7CC-B495487A6020}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpRestApiClientKeystone.FastFixer", "src\CSharpRestApiClientKeystone.FastFixer\CSharpRestApiClientKeystone.FastFixer.csproj", "{B58477E3-E380-46F2-B9DA-9EDEBAE5E013}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,10 +36,15 @@ Global
 		{DB5E33DC-029D-4B47-B7CC-B495487A6020}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB5E33DC-029D-4B47-B7CC-B495487A6020}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB5E33DC-029D-4B47-B7CC-B495487A6020}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B58477E3-E380-46F2-B9DA-9EDEBAE5E013}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B58477E3-E380-46F2-B9DA-9EDEBAE5E013}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B58477E3-E380-46F2-B9DA-9EDEBAE5E013}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B58477E3-E380-46F2-B9DA-9EDEBAE5E013}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4204C84D-38D9-4E8B-BFA9-A1EF1A6A5610} = {61E897A0-FABC-4B75-9FB1-F4D9021C60A4}
 		{AA9550D9-2775-45C1-8187-772445D0C542} = {61E897A0-FABC-4B75-9FB1-F4D9021C60A4}
 		{DB5E33DC-029D-4B47-B7CC-B495487A6020} = {0025E22B-67D6-4949-926C-EEAD0AB18519}
+		{B58477E3-E380-46F2-B9DA-9EDEBAE5E013} = {61E897A0-FABC-4B75-9FB1-F4D9021C60A4}
 	EndGlobalSection
 EndGlobal
