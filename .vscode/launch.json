@@ -1,0 +1,22 @@
+{
+	"configurations": [
+		{
+			"name": "C#: Benchmarks",
+			"type": "dotnet",
+			"request": "launch",
+			"projectPath": "${workspaceFolder}\\src\\Benchmarks\\Benchmarks.csproj",
+			"launchConfigurationId": "TargetFramework=;Benchmarks"
+		},
+        {
+			"name": "C#: FastFixer",
+			"type": "coreclr",
+			"request": "launch",
+            "preLaunchTask": "build",
+			"program": "${workspaceFolder}/src/CSharpRestApiClientKeystone.FastFixer/bin/Debug/net8.0/CSharpRestApiClientKeystone.FastFixer.dll",
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "args": ["${workspaceFolder}/tests/CSharpRestApiClientKeystone.Analyzers.Test/DataSource/JsonStringDeserializationUnitTests/StringInUseAsync/Source/Class1.csx"]
+		}
+	]
+}
