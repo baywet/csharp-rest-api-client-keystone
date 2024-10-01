@@ -104,6 +104,11 @@ public class FixFileCommandHandler : ICommandHandler
         foreach (var doc in project.Documents)
         {
             var code = await GetStringFromDocumentAsync(doc, cancellationToken).ConfigureAwait(false);
+            if (doc.FilePath is null)
+            {
+                Console.WriteLine($"ERROR: Document {doc.Name} has no file path");
+                continue;
+            }
             await File.WriteAllTextAsync(doc.FilePath, code, new UTF8Encoding(true), cancellationToken).ConfigureAwait(false);
             Console.WriteLine($"Fixed {doc.FilePath}");
         }
