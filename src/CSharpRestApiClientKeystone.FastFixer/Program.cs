@@ -6,35 +6,14 @@ public static class Program
 {
     static async Task<int> Main(string[] args)
     {
-        using var cts = new CancellationTokenSource();
-        Console.CancelKeyPress += (sender, eventArgs) =>
-        {
-            eventArgs.Cancel = true;
-            cts.Cancel();
-        };
-        var input = await ReadStandardInputAsync(cts.Token).ConfigureAwait(false);
-        var rootCommand = GetRootCommand(input);
+        var rootCommand = GetRootCommand();
         return await rootCommand.InvokeAsync(args).ConfigureAwait(true);
     }
-    static async Task<string> ReadStandardInputAsync(CancellationToken cancellationToken)
+    private static RootCommand GetRootCommand()
     {
-        using var siStream = Console.OpenStandardInput();
-        using var sr = new StreamReader(siStream);
-        var readingTask = sr.ReadToEndAsync(cancellationToken);
-        var timeOutTask = Task.Delay(100, cancellationToken);
-        var resultTask = await Task.WhenAny(readingTask, timeOutTask).ConfigureAwait(false);
-        if (resultTask == timeOutTask)
-            return string.Empty;
-        return await readingTask.ConfigureAwait(false);
-    }
-    private static RootCommand GetRootCommand(string inputValueForFilePath)
-    {
-        var inputProvided = !string.IsNullOrWhiteSpace(inputValueForFilePath);
-        var fileArgument = new Argument<List<string>>("filePath", "The file path to the source file to fix") {
-            Arity = inputProvided ? ArgumentArity.ZeroOrMore : ArgumentArity.OneOrMore,
+        var csprojArgument = new Argument<string>("csprojPath", "The file path to the csproj for files to fix") {
+            Arity = ArgumentArity.ExactlyOne,
         };
-        if (inputProvided)
-            fileArgument.SetDefaultValue(inputValueForFilePath.Split([' ', '\n', ','], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Distinct(StringComparer.OrdinalIgnoreCase).ToList());
 
         var nugetPackagesOption = new Option<List<string>>("--nuget-packages", "The nuget packages to use for the fixer") {
             Arity = ArgumentArity.ZeroOrMore,
@@ -48,14 +27,14 @@ public static class Program
 
         var rootCommand = new RootCommand
         {
-            fileArgument,
+            csprojArgument,
             nugetPackagesOption,
             deffectsToFixOption,
         };
 
         var fileCommandHandler = new FixFileCommandHandler
         {
-            FilePathsArgument = fileArgument,
+            CsProjPathArgument = csprojArgument,
             NugetPackagesOption = nugetPackagesOption,
             DeffectsToFixOption = deffectsToFixOption,
         };

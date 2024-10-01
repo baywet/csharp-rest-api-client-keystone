@@ -16,7 +16,7 @@
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "console": "internalConsole",
-            "args": ["${workspaceFolder}/tests/CSharpRestApiClientKeystone.Analyzers.Test/DataSource/JsonStringDeserializationUnitTests/StringInUseAsync/Source/Class1.csx"]
+            "args": ["${workspaceFolder}/src/Benchmarks/Benchmarks.csproj"]
 		}
 	]
 }

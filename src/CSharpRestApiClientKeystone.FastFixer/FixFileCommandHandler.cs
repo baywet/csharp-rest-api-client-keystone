@@ -6,6 +6,9 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Text;
 
+using Buildalyzer;
+using Buildalyzer.Workspaces;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
@@ -19,7 +22,7 @@ namespace CSharpRestApiClientKeystone.FastFixer;
 
 public class FixFileCommandHandler : ICommandHandler
 {
-    public required Argument<List<string>> FilePathsArgument { get; init; }
+    public required Argument<string> CsProjPathArgument { get; init; }
     public required Option<List<string>> NugetPackagesOption { get; init; }
     public required Option<List<string>> DeffectsToFixOption { get; init; }
     public int Invoke(InvocationContext context)
@@ -29,15 +32,14 @@ public class FixFileCommandHandler : ICommandHandler
 
     public async Task<int> InvokeAsync(InvocationContext context)
     {
-        var filePaths = context.ParseResult.GetValueForArgument(FilePathsArgument).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        var csprojPath = context.ParseResult.GetValueForArgument(CsProjPathArgument);
         var nugetPackages = (context.ParseResult.GetValueForOption(NugetPackagesOption) ?? []).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         var deffectsToFix = (context.ParseResult.GetValueForOption(DeffectsToFixOption) ?? []).Distinct(StringComparer.OrdinalIgnoreCase).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var cancellationToken = context.BindingContext.GetService(typeof(CancellationToken)) is CancellationToken token ? token : CancellationToken.None;
 
-        var missingFiles = filePaths.Where(x => !Path.Exists(x)).ToList();
-        if (missingFiles.Count > 0)
+        if (!Path.Exists(csprojPath))
         {
-            Console.WriteLine($"ERROR: Files {string.Join(',', filePaths)} not found");
+            Console.WriteLine($"ERROR: Files {csprojPath} not found");
             return 1;
         }
 
@@ -45,15 +47,10 @@ public class FixFileCommandHandler : ICommandHandler
         var analyzersToApply = loadedAnalyzers.Where(x => deffectsToFix.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
         var fixProvidersToApply = loadedFixProviders.Where(x => deffectsToFix.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
 
-        var originalSources = new Dictionary<string, string>(filePaths.Count);
-        foreach (var file in filePaths)
-        {
-            originalSources.Add(file, await File.ReadAllTextAsync(file, cancellationToken));
-        }
-
+        var originalProject = CreateProject(csprojPath);
         foreach(var analyzerToApply in analyzersToApply)
         {
-            await FixCSharpAsync(originalSources, analyzerToApply.Value, fixProvidersToApply[analyzerToApply.Key], cancellationToken);
+            await FixCSharpAsync(originalProject, analyzerToApply.Value, fixProvidersToApply[analyzerToApply.Key], cancellationToken);
         }
         Console.WriteLine("All done");
         return 0;
@@ -101,15 +98,14 @@ public class FixFileCommandHandler : ICommandHandler
         return (resultAnalyzers, resultFixProviders);
     }
 
-    private static async Task FixCSharpAsync(Dictionary<string, string> sources, DiagnosticAnalyzer analyzer, CodeFixProvider fix, CancellationToken cancellationToken)
+    private static async Task FixCSharpAsync(Project originalProject, DiagnosticAnalyzer analyzer, CodeFixProvider fix, CancellationToken cancellationToken)
     {
-        var originalProject = CreateProject(sources);
         var project = await ApplyFixAsync(originalProject, analyzer, fix, cancellationToken).ConfigureAwait(false);
         foreach (var doc in project.Documents)
         {
             var code = await GetStringFromDocumentAsync(doc, cancellationToken).ConfigureAwait(false);
-            await File.WriteAllTextAsync(doc.Name, code, new UTF8Encoding(true), cancellationToken).ConfigureAwait(false);
-            Console.WriteLine($"Fixed {doc.Name}");
+            await File.WriteAllTextAsync(doc.FilePath, code, new UTF8Encoding(true), cancellationToken).ConfigureAwait(false);
+            Console.WriteLine($"Fixed {doc.FilePath}");
         }
     }
     #region ImportedFromUnitTests
@@ -162,44 +158,14 @@ public class FixFileCommandHandler : ICommandHandler
 
         return project;
     }
-    protected static CSharpCompilationOptions CompilationOptions => new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
-    private static readonly DirectoryInfo _coreDir = Directory.GetParent(System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory());
-    protected static readonly IEnumerable<MetadataReference> References =
-    [
-        MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-        MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
-        MetadataReference.CreateFromFile(typeof(CSharpCompilation).Assembly.Location),
-        MetadataReference.CreateFromFile(typeof(Compilation).Assembly.Location),
-        MetadataReference.CreateFromFile(typeof(System.Net.Http.HttpContent).Assembly.Location),
-        MetadataReference.CreateFromFile(typeof(Object).GetTypeInfo().Assembly.Location),
-        MetadataReference.CreateFromFile(_coreDir.FullName + Path.DirectorySeparatorChar + "System.Runtime.dll")
-    ];
-    private const string TestProjectName = "TestProject";
-    private static Project CreateProject(Dictionary<string, string> sources)
+    private static Project CreateProject(string csProjPath)
     {
-        var projectId = ProjectId.CreateNewId(debugName: TestProjectName);
-
-        var solution = new AdhocWorkspace()
-            .CurrentSolution
-            .AddProject(projectId, TestProjectName, TestProjectName, LanguageNames.CSharp);
-
-        foreach (var reference in References)
-        {
-            solution = solution.AddMetadataReference(projectId, reference);
-        }
-
-        int count = 0;
-        foreach (var source in sources)
-        {
-            var newFileName = source.Key;
-            var documentId = DocumentId.CreateNewId(projectId, debugName: newFileName);
-            solution = solution.AddDocument(documentId, newFileName, SourceText.From(source.Value));
-            count++;
-        }
-
-        var project = solution.GetProject(projectId)
-            .WithCompilationOptions(CompilationOptions);
-        return project;
+        var manager = new AnalyzerManager();
+        var analyzer = manager.GetProject(csProjPath);
+        // var results = analyzer.Build();
+        // var sourceFiles = results.First().SourceFiles;
+        using var workspace = manager.GetWorkspace();
+        return workspace.CurrentSolution.Projects.First();
     }
     private static Diagnostic[] GetDiagnostics(Project project, DiagnosticAnalyzer analyzer)
     {
