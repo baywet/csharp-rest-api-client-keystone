@@ -124,7 +124,7 @@ public class FixFileCommandHandler : ICommandHandler
     }
     private static async Task<Project> ApplyFixAsync(Project project, DiagnosticAnalyzer analyzer, CodeFixProvider fix, CancellationToken cancellationToken)
     {
-        var diagnostics = GetDiagnostics(project, analyzer);
+        var diagnostics = await GetDiagnosticsAsync(project, analyzer, cancellationToken).ConfigureAwait(false);
         var fixableDiagnostics = diagnostics.Where(d => fix.FixableDiagnosticIds.Contains(d.Id)).ToArray();
 
         var attempts = fixableDiagnostics.Length;
@@ -132,7 +132,7 @@ public class FixFileCommandHandler : ICommandHandler
         for (int i = 0; i < attempts; i++)
         {
             var diag = fixableDiagnostics.First();
-            var doc = project.Documents.FirstOrDefault(d => d.Name == diag.Location.SourceTree.FilePath);
+            var doc = project.Documents.FirstOrDefault(d => d.FilePath == diag.Location.SourceTree.FilePath);
 
             if (doc == null)
             {
@@ -155,7 +155,7 @@ public class FixFileCommandHandler : ICommandHandler
                 var solution = operations.OfType<ApplyChangesOperation>().Single().ChangedSolution;
                 project = solution.GetProject(project.Id);
 
-                fixableDiagnostics = GetDiagnostics(project, analyzer)
+                fixableDiagnostics = (await GetDiagnosticsAsync(project, analyzer, cancellationToken).ConfigureAwait(false))
                     .Where(d => fix.FixableDiagnosticIds.Contains(d.Id)).ToArray();
 
                 if (fixableDiagnostics.Length == 0) break;
@@ -176,10 +176,10 @@ public class FixFileCommandHandler : ICommandHandler
             ? firstProject.AddAnalyzerReference(new AnalyzerImageReference(analyzersToApply.Select(static x => x.Value).ToImmutableArray()))
             : firstProject;
     }
-    private static Diagnostic[] GetDiagnostics(Project project, DiagnosticAnalyzer analyzer)
+    private static async Task<Diagnostic[]> GetDiagnosticsAsync(Project project, DiagnosticAnalyzer analyzer, CancellationToken cancellationToken)
     {
-        var compilationWithAnalyzers = project.GetCompilationAsync().Result.WithAnalyzers(ImmutableArray.Create(analyzer));
-        var diagnostics = compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().Result;
+        var compilationWithAnalyzers = (await project.GetCompilationAsync(cancellationToken).ConfigureAwait(false)).WithAnalyzers(ImmutableArray.Create(analyzer));
+        var diagnostics = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync(cancellationToken).ConfigureAwait(false);
         return diagnostics.OrderBy(d => d.Location.SourceSpan.Start).ToArray();
     }
     #endregion
