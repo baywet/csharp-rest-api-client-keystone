@@ -3,6 +3,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO.Compression;
 using System.Reflection;
+using System.Text;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
@@ -53,6 +54,7 @@ public class FixFileCommandHandler : ICommandHandler
         {
             await FixCSharpAsync(originalSources, analyzerToApply.Value, fixProvidersToApply[analyzerToApply.Key], cancellationToken);
         }
+        Console.WriteLine("All done");
         return 0;
     }
     private static readonly HttpClient HttpClient = new();
@@ -98,20 +100,15 @@ public class FixFileCommandHandler : ICommandHandler
         return (resultAnalyzers, resultFixProviders);
     }
 
-    private async Task FixCSharpAsync(Dictionary<string, string> sources, DiagnosticAnalyzer analyzer, CodeFixProvider fix, CancellationToken cancellationToken)
+    private static async Task FixCSharpAsync(Dictionary<string, string> sources, DiagnosticAnalyzer analyzer, CodeFixProvider fix, CancellationToken cancellationToken)
     {
         var originalProject = CreateProject(sources);
-
-        // var diagnostics = GetDiagnostics(originalProject, analyzer);
-
         var project = await ApplyFixAsync(originalProject, analyzer, fix, cancellationToken).ConfigureAwait(false);
-        var actualSources = new Dictionary<string, string>();
-
         foreach (var doc in project.Documents)
         {
             var code = await GetStringFromDocumentAsync(doc, cancellationToken).ConfigureAwait(false);
-            actualSources.Add(doc.Name, code);
-            //TODO write to file if changed
+            await File.WriteAllTextAsync(doc.Name, code, new UTF8Encoding(true), cancellationToken).ConfigureAwait(false);
+            Console.WriteLine($"Fixed {doc.Name}");
         }
     }
     #region ImportedFromUnitTests
