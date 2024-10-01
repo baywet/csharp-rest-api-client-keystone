@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 
 using Buildalyzer;
+using Buildalyzer.Construction;
 using Buildalyzer.Workspaces;
 
 using Microsoft.CodeAnalysis;
@@ -47,7 +48,7 @@ public class FixFileCommandHandler : ICommandHandler
         var analyzersToApply = loadedAnalyzers.Where(x => deffectsToFix.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
         var fixProvidersToApply = loadedFixProviders.Where(x => deffectsToFix.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
 
-        var originalProject = CreateProject(csprojPath);
+        var originalProject = CreateProject(csprojPath, analyzersToApply);
         foreach(var analyzerToApply in analyzersToApply)
         {
             await FixCSharpAsync(originalProject, analyzerToApply.Value, fixProvidersToApply[analyzerToApply.Key], cancellationToken);
@@ -163,14 +164,17 @@ public class FixFileCommandHandler : ICommandHandler
 
         return project;
     }
-    private static Project CreateProject(string csProjPath)
+    private static Project CreateProject(string csProjPath, Dictionary<string, DiagnosticAnalyzer> analyzersToApply)
     {
         var manager = new AnalyzerManager();
         var analyzer = manager.GetProject(csProjPath);
         // var results = analyzer.Build();
         // var sourceFiles = results.First().SourceFiles;
         using var workspace = manager.GetWorkspace();
-        return workspace.CurrentSolution.Projects.First();
+        var firstProject = workspace.CurrentSolution.Projects.First();
+        return !firstProject.AnalyzerReferences.Any(static x => x.Display.Equals("Microsoft.VisualStudio.Threading.Analyzers"))
+            ? firstProject.AddAnalyzerReference(new AnalyzerImageReference(analyzersToApply.Select(static x => x.Value).ToImmutableArray()))
+            : firstProject;
     }
     private static Diagnostic[] GetDiagnostics(Project project, DiagnosticAnalyzer analyzer)
     {
