@@ -12,11 +12,20 @@ public static class Program
             eventArgs.Cancel = true;
             cts.Cancel();
         };
+        var input = await ReadStandardInputAsync(cts.Token).ConfigureAwait(false);
+        var rootCommand = GetRootCommand(input);
+        return await rootCommand.InvokeAsync(args).ConfigureAwait(true);
+    }
+    static async Task<string> ReadStandardInputAsync(CancellationToken cancellationToken)
+    {
         using var siStream = Console.OpenStandardInput();
         using var sr = new StreamReader(siStream);
-        var input = await sr.ReadToEndAsync(cts.Token);
-        var rootCommand = GetRootCommand(input);
-        return await rootCommand.InvokeAsync(args);
+        var readingTask = sr.ReadToEndAsync(cancellationToken);
+        var timeOutTask = Task.Delay(100, cancellationToken);
+        var resultTask = await Task.WhenAny(readingTask, timeOutTask).ConfigureAwait(false);
+        if (resultTask == timeOutTask)
+            return string.Empty;
+        return await readingTask.ConfigureAwait(false);
     }
     private static RootCommand GetRootCommand(string inputValueForFilePath)
     {
