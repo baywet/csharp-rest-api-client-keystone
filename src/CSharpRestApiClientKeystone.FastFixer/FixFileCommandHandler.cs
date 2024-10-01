@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using System.CommandLine;
 using System.CommandLine.Invocation;
@@ -146,7 +147,7 @@ public class FixFileCommandHandler : ICommandHandler
                 break;
             }
 
-            foreach (var codeAction in actions)
+            foreach (var codeAction in actions.Where(x => x.Title.Contains("false", StringComparison.OrdinalIgnoreCase)))
             {
                 var operations = await codeAction.GetOperationsAsync(cancellationToken).ConfigureAwait(false);
                 var solution = operations.OfType<ApplyChangesOperation>().Single().ChangedSolution;
