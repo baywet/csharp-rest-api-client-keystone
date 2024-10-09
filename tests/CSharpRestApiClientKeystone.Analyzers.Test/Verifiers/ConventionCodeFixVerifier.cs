@@ -1,22 +1,24 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
-using System;
+
 using Xunit;
-using System.Threading.Tasks;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
-using System.Reflection;
 
 namespace TestHelper
 {
@@ -128,31 +130,33 @@ namespace TestHelper
 
             var diagnostics = GetDiagnostics(originalProject, analyzer);
             VerifyDiagnosticResults(diagnostics, analyzer, expectedResults);
-
-            foreach (var fixResult in fixResults)
+            if (fix != null)
             {
-                var project = await ApplyFixAsync(originalProject, analyzer, fix, fixResult.Index);
-
-                var expectedSources = fixResult.ExpectedSources;
-
-                if (expectedSources == null || expectedSources.Count == 0)
-                    return;
-
-                var actualSources = new Dictionary<string, string>();
-
-                foreach (var doc in project.Documents)
+                foreach (var fixResult in fixResults)
                 {
-                    var code = GetStringFromDocument(doc);
-                    actualSources.Add(doc.Name, code);
-                }
+                    var project = await ApplyFixAsync(originalProject, analyzer, fix, fixResult.Index);
 
-                Assert.True(actualSources.Keys.SequenceEqual(expectedSources.Keys));
+                    var expectedSources = fixResult.ExpectedSources;
 
-                foreach (var item in actualSources)
-                {
-                    var actual = item.Value;
-                    var newSource = expectedSources[item.Key];
-                    Assert.Equal(newSource, actual);
+                    if (expectedSources == null || expectedSources.Count == 0)
+                        return;
+
+                    var actualSources = new Dictionary<string, string>();
+
+                    foreach (var doc in project.Documents)
+                    {
+                        var code = GetStringFromDocument(doc);
+                        actualSources.Add(doc.Name, code);
+                    }
+
+                    Assert.True(actualSources.Keys.SequenceEqual(expectedSources.Keys));
+
+                    foreach (var item in actualSources)
+                    {
+                        var actual = item.Value;
+                        var newSource = expectedSources[item.Key];
+                        Assert.Equal(newSource, actual);
+                    }
                 }
             }
         }
@@ -218,7 +222,7 @@ namespace TestHelper
             MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.JsonConvert).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(System.Net.Http.HttpContent).Assembly.Location),
             MetadataReference.CreateFromFile(typeof(Object).GetTypeInfo().Assembly.Location),
-            MetadataReference.CreateFromFile(_coreDir.FullName + Path.DirectorySeparatorChar + "System.Runtime.dll")
+            MetadataReference.CreateFromFile(_coreDir.FullName + Path.DirectorySeparatorChar + "System.Runtime.dll"),
         ];
 
         protected virtual CSharpCompilationOptions CompilationOptions => new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
